@@ -13,3 +13,5 @@ A verilog-based vending machine designed for the course "Digital System Course D
 - Supports change. If user pays more than the total price of the bought goods, the vending machine will display the amount of change.
 
 - Users can press the "Quit" button anytime through the trading process to exit.
+# Flowchart
+Can be seen in [flowchart.pdf].
