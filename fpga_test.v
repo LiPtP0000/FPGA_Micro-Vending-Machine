@@ -80,7 +80,7 @@ output [7:0] Seg_select
    //第一段状态机（基本的状态跳转）
 always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发  
    begin  
-       if (sys_rst_n) // 使用逻辑非操作符简化比较，异步复位到IDLE状态  
+       if (sys_rst_n) 
            state <= IDLE;  
        else  
        begin  
