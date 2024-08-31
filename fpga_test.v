@@ -52,7 +52,8 @@ output [7:0] Seg_select
     parameter PAYMENT  =6'b001000;
     parameter CHANGE   =6'b010000;
     parameter TEMP     =6'b100000;
-   //状态和变量寄存
+   //varibles and statuses
+   //where is refund register?
    reg [5:0] state;
    reg [7:0] need_money_buf=8'd0;//所需金额 
    reg [7:0] input_money_buf=8'd0;//投币的总币值 
@@ -60,9 +61,9 @@ output [7:0] Seg_select
    reg [7:0] need_money_1=8'd0;//商品 1 所需金额 
    reg [7:0] need_money_2=8'd0;//商品 2 所需金额 
 
-   wire [7:0] Price_Money; 
-   wire [7:0] Input_Money; 
-   wire [7:0] Change_Money; 
+   wire [7:0] Price_Money;  //total price of the good(s)
+   wire [7:0] Input_Money;  //price users have input
+   wire [7:0] Change_Money; //input minus price
    wire Goods_btn; 
    wire Confirm_btn; 
    wire Change_btn; 
@@ -77,7 +78,11 @@ output [7:0] Seg_select
    assign goods_code={1'b0,type_SW1,1'b0,type_SW2}; 
  
    assign total_money={money_one,money_five,money_ten,money_twenty,money_fifty};
-   //第一段状态机（基本的状态跳转）
+
+
+/*State Machine layer 1
+ *Distinguish states, and state transform
+*/
 always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发  
    begin  
        if (sys_rst_n) 
@@ -90,7 +95,7 @@ always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复
                        state <= GOODS_one; // 从IDLE转到GOODS_one  
      
                GOODS_one:  
-                   begin // 使用大括号明确语句块的范围  
+                   begin 
                        if (sys_Goods)  
                            state <= GOODS_two;  
                        else if (sys_Confirm)  
@@ -113,7 +118,7 @@ always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复
                    begin  
                        if (sys_Cancel)  
                            state <= TEMP; // 取消并转到TEMP状态  
-                       else if (input_money_buf >= need_money_buf)  
+                       else if (input_money_buf >= need_money_buf & sys_Confirm)  
                            state <= CHANGE; // 投币足够，转到找零状态  
                        else  
                            state <= PAYMENT; // 保持当前状态  
@@ -126,12 +131,12 @@ always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复
                        else  
                            state <= CHANGE; // 继续找零  
                    end  
-     
+                
                TEMP:  
                    begin  
                        if (sys_Confirm)  
                            state <= GOODS_one; // 重新选择商品  
-                       else if (sys_Change) // 假设使用sys_Change而不是sys_cancle作为手动找零的信号名  
+                       else if (sys_Change) // 假设使用sys_Change而不是sys_cancel作为手动找零的信号名  
                            state <= CHANGE;  
                        else  
                            state <= TEMP; // 保持当前状态  
@@ -142,14 +147,18 @@ always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复
            endcase  
        end  
    end
-//第二段状态机
+/* State Machine layer 2
+ * Processing payment status
+ * Adding different notes inserted by users, and store the final inserted price in the input_money_buf reg
+ *
+*/
 always @(posedge sys_clk or negedge sys_rst_n)  //商品一的状态处理 
    begin  
        if (!sys_rst_n) // 异步复位  
            need_money_1 <= 8'd0;  
        else if (state == GOODS_one) // 第一次的商品数量和种类  
        begin  
-           case (goods_code) // 商品编号  
+           case (goods_code) //calculate price,result stored in need_money_1  
                8'h11: need_money_1 <= num_SW * 8'd3;  
                8'h12: need_money_1 <= num_SW * 8'd4;  
                8'h13: need_money_1 <= num_SW * 8'd6;  
@@ -170,7 +179,7 @@ always @(posedge sys_clk or negedge sys_rst_n)  //商品一的状态处理
            endcase  
        end    
    end
-//第二段状态机 
+
 always @(posedge sys_clk or negedge sys_rst_n) begin // 商品二的状态处理  
        if (!sys_rst_n) begin // 异步复位  
            need_money_2 <= 8'd0;  
@@ -196,12 +205,14 @@ always @(posedge sys_clk or negedge sys_rst_n) begin // 商品二的状态处理
            endcase  
        end   
    end
-//第二段状态机 
+
+
 always @(posedge sys_clk or negedge sys_rst_n) begin // 付款的状态处理  
        if (!sys_rst_n) begin // 异步复位  
            input_money_buf <= 8'd0;  
-       end else begin  
-           if (state == PAYMENT) begin // 投币状态  
+       end else if(state == PAYMENT)begin  
+            //Need display: show user the amount of inserted money
+            // 投币状态  
                if (in_money_one) begin  
                    input_money_buf <= input_money_buf + 8'd1;  
                end else if (in_money_five) begin  
@@ -213,12 +224,22 @@ always @(posedge sys_clk or negedge sys_rst_n) begin // 付款的状态处理
                end else if (in_money_fifty) begin  
                    input_money_buf <= input_money_buf + 8'd50;  
                end else begin  
-               end  
-           end else if (state == IDLE) begin 
-               input_money_buf <= 8'd0;  
-           end else begin 
-           end  
+               end   
        end  
-   end
-always @(posedge sys_clk or negedge sys_rst_n) begin // 找零状态的处理 
+end
+always @(posedge sys_clk or negedge sys_rst_n) begin
+        //Change & Refund
+        //no rst
+        if(state == CHANGE) begin
+        if(input_money_buf > need_money_buf) begin
+            change_money_buf <= input_money_buf - need_money_buf;
+            if(sys_Change) begin
+                change_money_buf <= change_money_buf - 8'd1;
+                //Display change_money_buf on the 7-segment display
+                //need display module.
+            end 
+        end  
+        end         
+end
+
 endmodule
