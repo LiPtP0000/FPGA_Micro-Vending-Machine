@@ -68,19 +68,19 @@ end
 // 数码管位选和显示数字逻辑  
 // ------------------------------------------  
  reg [4:0] display_num = 5'd0;  
-// always @(posedge sys_clk) begin  
-//     case (sig_num)  
-//         3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
-//         3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
-//         3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // 显示 空格"-"  
-//         3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
-//         3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
-//         3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // 显示 空格"-"  
-//         3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
-//         3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
-//         default: bit_select <= 8'b11111111;  
-//     endcase  
-// end  
+    always @(posedge sys_clk) begin  
+    case (sig_num)  
+        3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
+        3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
+        3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // 显示 空格"-"  
+        3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
+        3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
+        3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // 显示 空格"-"  
+        3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
+        3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
+        default: bit_select <= 8'b11111111;  
+    endcase  
+end  
   
 // ------------------------------------------  
 // 数码管段选输出  
