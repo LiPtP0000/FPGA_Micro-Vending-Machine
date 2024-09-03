@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module basic_state_transitions(
+module state_transitions(
 //输入
 input wire sys_clk,
 input wire sys_rst_n,   //复位-BTND 
@@ -83,6 +83,7 @@ output [7:0] Seg_select
 /*State Machine layer 1
  *Distinguish states, and state transform
 */
+
 always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发  
    begin  
        if (sys_rst_n) 

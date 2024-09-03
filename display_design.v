@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: General Display module for 7-segment displayer
 // 
 // Dependencies: 
 // 
@@ -67,43 +67,43 @@ end
 // ------------------------------------------  
 // 数码管位选和显示数字逻辑  
 // ------------------------------------------  
-reg [3:0] display_num = 4'd0;  
-always @(posedge sys_clk) begin  
-    case (sig_num)  
-        3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
-        3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
-        3'd2: begin bit_select <= 8'b11111011; display_num <= 4'd16; end  // 显示 空格"-"  
-        3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
-        3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
-        3'd5: begin bit_select <= 8'b11011111; display_num <= 4'd16; end  // 显示 空格"-"  
-        3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
-        3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
-        default: bit_select <= 8'b11111111;  
-    endcase  
-end  
+ reg [4:0] display_num = 5'd0;  
+// always @(posedge sys_clk) begin  
+//     case (sig_num)  
+//         3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
+//         3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
+//         3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // 显示 空格"-"  
+//         3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
+//         3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
+//         3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // 显示 空格"-"  
+//         3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
+//         3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
+//         default: bit_select <= 8'b11111111;  
+//     endcase  
+// end  
   
 // ------------------------------------------  
 // 数码管段选输出  
 // ------------------------------------------  
 always @(posedge sys_clk) begin  
     case (display_num)  
-        4'd0: seg_select <= SEG_0;  
-        4'd1: seg_select <= SEG_1;  
-        4'd2: seg_select <= SEG_2;  
-        4'd3: seg_select <= SEG_3;  
-        4'd4: seg_select <= SEG_4;  
-        4'd5: seg_select <= SEG_5;  
-        4'd6: seg_select <= SEG_6;  
-        4'd7: seg_select <= SEG_7;  
-        4'd8: seg_select <= SEG_8;  
-        4'd9: seg_select <= SEG_9;  
-        4'd10: seg_select <= SEG_A;  
-        4'd11: seg_select <= SEG_B;
-        4'd12: seg_select <= SEG_C;
-        4'd13: seg_select <= SEG_D;
-        4'd14: seg_select <= SEG_E;
-        4'd15: seg_select <= SEG_F;
-        4'd16: seg_select <= SEG_S;
+        5'd0: seg_select <= SEG_0;  
+        5'd1: seg_select <= SEG_1;  
+        5'd2: seg_select <= SEG_2;  
+        5'd3: seg_select <= SEG_3;  
+        5'd4: seg_select <= SEG_4;  
+        5'd5: seg_select <= SEG_5;  
+        5'd6: seg_select <= SEG_6;  
+        5'd7: seg_select <= SEG_7;  
+        5'd8: seg_select <= SEG_8;  
+        5'd9: seg_select <= SEG_9;  
+        5'd10: seg_select <= SEG_A;  
+        5'd11: seg_select <= SEG_B;
+        5'd12: seg_select <= SEG_C;
+        5'd13: seg_select <= SEG_D;
+        5'd14: seg_select <= SEG_E;
+        5'd15: seg_select <= SEG_F;
+        5'd16: seg_select <= SEG_S;
         default: ;  
     endcase  
 end  
