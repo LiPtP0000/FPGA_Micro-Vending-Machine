@@ -1,26 +1,4 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2024/09/05 20:57:46
-// Design Name: 
-// Module Name: control_td
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
-`timescale 1ns / 1ps
 
 module state_transitions_tb();
 
@@ -39,10 +17,12 @@ module state_transitions_tb();
     reg [2:0] type_SW_high;
     reg [2:0] type_SW_low;
     reg [1:0] num_SW;
+    //reg [7:0] input_money;
 
     // 输出信号
     wire [7:0] Bit_select;
     wire [7:0] Seg_select;
+    wire [5:0] state; // 增加 state 输出信号
 
     // 实例化被测试模块
     state_transitions uut (
@@ -62,6 +42,7 @@ module state_transitions_tb();
         .num_SW(num_SW),
         .Bit_select(Bit_select),
         .Seg_select(Seg_select)
+        //.input_money(input_money)
     );
 
     // 时钟生成
@@ -72,6 +53,8 @@ module state_transitions_tb();
 
     // 测试激励
     initial begin
+    $monitor("Time = %0t | state = %b | need_money_buf = %d | input_money_buf = %d | change_money_buf = %d | Bit_select = %b | Seg_select = %b",
+                 $time, uut.state, uut.need_money_buf, uut.input_money_buf, uut.change_money_buf, Bit_select, Seg_select);
         // 初始化信号
         sys_rst_n = 0;
         sys_Goods = 0;
@@ -87,35 +70,40 @@ module state_transitions_tb();
         type_SW_low = 3'b000;
         num_SW = 2'b00;
 
-        // 复位信号
+        // 激活复位信号并松开
         #100 sys_rst_n = 1;
+        #10 sys_rst_n = 0;
 
-        // 模拟输入信号
-        #100 sys_Confirm = 1;
+        // 模拟输入信号，延长时间
+        #200 sys_Confirm = 1; #10 sys_Confirm = 0;
         #100 type_SW_high = 3'd2;
         #100 type_SW_low = 3'd1;
         #100 num_SW = 2'd3;
-        #100 sys_Goods = 1;
+        #100 sys_Goods = 1; #10 sys_Goods = 0;
         #100 type_SW_high = 3'd3;
         #100 type_SW_low = 3'd3;
         #100 num_SW = 2'd1;
-        #100 sys_Confirm = 1;
-        #100 in_money_one = 1;
-        #100 in_money_five = 1;
-        #100 in_money_ten = 1;
-        #100 in_money_twenty = 1;
-        #100 in_money_fifty = 1;
-        #100 sys_Change = 1;
-        #10 sys_Change = 0;
-        #100 sys_Change = 1;
-        #10 sys_Change = 0;
-        #100 sys_Change = 1;
-        #10 sys_Change = 0;
-        #100 sys_Change = 1;
-        #10 sys_Change = 0;
+        #100 sys_Confirm = 1; #10 sys_Confirm = 0;
+        #100 in_money_one = 1; #10 in_money_one = 0;
+        #100 in_money_five = 1; #10 in_money_five = 0;
+        #100 in_money_ten = 1; #10 in_money_ten = 0;
+        #100 in_money_twenty = 1; #10 in_money_twenty = 0;
+        #100 in_money_fifty = 1; #10 in_money_fifty = 0;
+        #100 sys_Change = 1; #10 sys_Change = 0;
+        #100 sys_Change = 1; #10 sys_Change = 0;
+        #100 sys_Change = 1; #10 sys_Change = 0;
+        #100 sys_Change = 1; #10 sys_Change = 0;
 
         // 结束仿真
-        #100 $finish;
+        #20000 $finish;
+    end
+
+    // 监视信号的值
+    initial begin
+        // 监视状态、需要金额、输入金额、找零金额等
+        $monitor("Time = %0t | state = %b | need_money_buf = %d | input_money_buf = %d | change_money_buf = %d | Bit_select = %b | Seg_select = %b",
+                 $time, uut.state, uut.need_money_buf, uut.input_money_buf, uut.change_money_buf, Bit_select, Seg_select);
     end
 
 endmodule
+
