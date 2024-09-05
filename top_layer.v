@@ -20,7 +20,7 @@
 
 module top_layer(
     //通过约束文件确定接口
-
+    input wire sys_clk,    //系统时钟-CLK 
     input wire key_Cancel,  //取消-BTNC 
     input wire key_Confirm, //确认-BTNU 
     input wire key_Change,  //找零按键-BTNR 
@@ -44,7 +44,7 @@ module top_layer(
     output wire [7:0] seg_select
 );
     wire money_one, money_five, money_ten, money_twenty, money_fifty;
-    wire sys_clk, sys_rst_n, sys_Goods, sys_Confirm, sys_Change, sys_Cancel;
+    wire sys_rst_n, sys_Goods, sys_Confirm, sys_Change, sys_Cancel;
 
     wire [7:0] need_money;         // 所需金额  
     wire [7:0] input_money;        // 投币的总币值  
