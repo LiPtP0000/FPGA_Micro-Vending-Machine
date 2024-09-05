@@ -64,21 +64,68 @@
     % 打印封面页
     \exptitlepage
     \section{课题背景}
-    \section{FPGA与Vivado简介}
-    \subsection{FPGA简介}
-    \subsection{Vivado简介}
-    \section{自动售货机功能介绍}
-    \section{系统设计}
     
-    \subsection{状态机设计}
-    状态机写入\texttt{state_transitions.v}中。
+    \section{FPGA与Vivado简介}
+    
+    \subsection{FPGA简介}
+    FPGA (Field Programmable Gate Array) 是一种集成电路可编程逻辑器件，它具有高灵活性、高可靠性、低功耗、高速度等特点，适合作为数字系统硬件设计的核心部件。利用FPGA，可以实现复杂的功能，如图像处理、视频处理、音频处理、机器人控制等，已经成为电子信息领域仿真、测试、验证的重要工具。
+
+    本设计中，我们将采用NEXY4 4 DDR 型号的主板作为主控芯片。它基于Artix-7 FPGA系列，具有多种接口，如VGA、USB、Ethernet接口，同时允许16位拨片输入信号，5个按钮，以及两个复位键，支持用户自定义，能够满足自动售货机的设计需求。
+    \subsection{Vivado简介}
+    Vivado是一款基于Xilinx FPGA的集成开发环境，它是一款功能强大、界面简洁、操作方便的集成开发环境。本实验将使用\texttt{Vivado 2017.4} 版本进行设计，并作为仿真及测试软件进行自动售货机的设计。
+    \section{自动售货机功能介绍}
+    \subsection{功能概述}
+    该项目的目标是设计一款基于FPGA的自动售货机，该自动售货机具有以下功能：
+    \begin{enumerate}
+        \item 商品选择：用户可以通过按下按钮选择商品，并将其放入“购物车”。允许用户每次最多选择两件商品（数量不限）。
+        \item 结账：用户可以在购买的过程中随时结算“购物车”中的商品，此时系统进入结账环节。支持用户使用1元、5元、10元、20元、50元进行支付，并支持溢出找零。
+        \item 找零：用户在结账过程中，若购物金额超过支付金额，系统将自动给用户找零。规定用户每次找零不超过1元，直至找零完毕。
+        \item 退出：用户可以在任意时刻退出系统，系统将自动清空“购物车”中的商品并退回至空闲状态。
+    \end{enumerate}
+    \subsection{系统流程图}
+    为了让自动售货机的工作流程更加清晰，便于用户理解该系统的工作原理，以及理清各个状态之间的关系，我们设计了下面的系统流程图，便于后续参考：
     \begin{figure}[htbp]
         \centering
         \includegraphics[width=0.5\textwidth]{fig/flowchart.pdf}
+        \caption{自动售货机系统架构}
+        \label{fig:flowchart}
     \end{figure}
+    \section{系统设计}
+    \subsection{代码文件列表}
+    \begin{itemize}
+        \item \texttt{state\_transition.v}：状态机及状态机之间的转换模块；
+        \item \texttt{display\_design.v}：显示模块；
+        \item \texttt{top\_layer.v}：顶层模块；
+        \item \texttt{key\_filter.v}：按键消抖部分；
+        \item 其他文件：测试文件、测试脚本等。
+    \end{itemize}
+    \subsection{状态机设计}
+    为了实现自动售货机的功能，我们使用了\texttt{两层状态机}进行实现。在 Verilog 设计中，可以通过\texttt{case-when}语句或者\texttt{if-else}语句实现状态机的功能。两层状态机的具体功能如下：
+    \begin{enumerate}
+        \item \textbf{第一层状态机}：完成六个状态的切换，包括空闲、商品选择、结账、找零、退出、空闲状态。
+        \item \textbf{第二层状态机}：分多个\texttt{always}块，分别完成商品选择、结账、找零、退出状态的具体功能（空闲状态的功能由第一层状态机完成）。
+    \end{enumerate}
+    
+    使用 Vscode 中的 \texttt{TerosHDL} 插件内置的状态机分析模块，我们可以很方便地生成 Verilog 代码对应状态机的状态转移图。经过比较，和理论设计的状态转移图进行了对比，发现两者转移图的状态数量、状态转移方向、状态转移条件等都一致。
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.5\textwidth]{fig/statemachine_0.svg}
+        \caption{状态转移图}
+    \end{figure}
+    \section{显示模块设计}
+    
     \section{仿真与实物验证}
+    \subsection{仿真}
+    我们使用Vivado的仿真功能对自动售货机进行了仿真，并通过测试验证了其功能。
+
+    值得一提的是，在仿真时，我们尝试使用 Vscode 中的 TerosHDL 插件进行仿真。TerosHDL 支持对项目进行仿真，并可以生成波形图。但由于其需要安装的附加组件较多，我们最终放弃了这个想法。
+    \subsection{实物验证}
+    将程序烧录至FPGA主板上，并连接上电源，测试其功能。
     \section{总结}
+
     \appendix
-    \section{完成该项目的依赖代码}
-    have something to be modified
+    \section{项目发布}
+    该项目的工程文件及本报告已经上传到Github上，项目地址为：\url{https://github.com/LiPtP0000/Micro-Vending-Machine}，包含了本项目的所有代码以及仿真测试文件。
+    \section{项目代码列表}
+    
 \end{document}
