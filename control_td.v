@@ -41,8 +41,11 @@ module state_transitions_tb();
         .type_SW_low(type_SW_low),
         .num_SW(num_SW),
         .Bit_select(Bit_select),
-        .Seg_select(Seg_select)
-        //.input_money(input_money)
+        .Seg_select(Seg_select),
+        .input_money_out(input_money),
+        .state_out(state),
+        .need_money_out(need_money),
+        .change_money_out(change_money)
     );
 
     //  ±÷”…˙≥…
