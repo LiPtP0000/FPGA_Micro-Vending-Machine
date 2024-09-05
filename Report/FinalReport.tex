@@ -100,16 +100,22 @@
         \item 其他文件：测试文件、测试脚本等。
     \end{itemize}
     \subsection{状态机设计}
-    为了实现自动售货机的功能，我们使用了\texttt{两层状态机}进行实现。在 Verilog 设计中，可以通过\texttt{case-when}语句或者\texttt{if-else}语句实现状态机的功能。两层状态机的具体功能如下：
+    为了实现自动售货机的功能，我们使用了\texttt{两层状态机}进行实现。在 Verilog 设计中，可以通过\texttt{case-when}语句或者\texttt{if-else}语句实现状态机的功能。两层状态机的各层功能如下：
     \begin{enumerate}
         \item \textbf{第一层状态机}：完成六个状态的切换，包括空闲、商品选择、结账、找零、退出、空闲状态。
         \item \textbf{第二层状态机}：分多个\texttt{always}块，分别完成商品选择、结账、找零、退出状态的具体功能（空闲状态的功能由第一层状态机完成）。
     \end{enumerate}
+    下面将具体描述两层状态机的实现。
+
+    \subsubsection{第一层状态机功能描述}
     
-    使用 Vscode 中的 \texttt{TerosHDL} 插件内置的状态机分析模块，我们可以很方便地生成 Verilog 代码对应状态机的状态转移图。经过比较，和理论设计的状态转移图进行了对比，发现两者转移图的状态数量、状态转移方向、状态转移条件等都一致。
-    \begin{figure}
+    \subsubsection{第二层状态机功能描述}
+    空闲状态下，系统处于待机状态，等待用户的操作。在该状态下，用户一旦按下“确认”键，系统将进入商品选择状态。
+    \subsubsection{商品选择状态}
+    使用 \texttt{vscode} 中的 \texttt{TerosHDL} 插件内置的状态机分析模块，我们可以很方便地生成 Verilog 代码对应状态机的状态转移图。经过比较，和理论设计的状态转移图进行了对比，发现两者转移图的状态数量、状态转移方向、状态转移条件等都一致。
+    \begin{figure}[htbp]
         \centering
-        \includegraphics[width=0.5\textwidth]{fig/statemachine_0.svg}
+        \includegraphics[width=0.75\textwidth]{fig/generatedFlowchart.png}
         \caption{状态转移图}
     \end{figure}
     \section{显示模块设计}
