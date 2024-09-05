@@ -28,16 +28,15 @@ input wire sys_Goods,   //商品选择键-BTNL
 input wire sys_Confirm, //确认-BTNU 
 input wire sys_Change,  //找零按键-BTNR 
 input wire sys_Cancel,  //取消-BTNC 
+
 input wire in_money_one,
 input wire in_money_five,
 input wire in_money_ten,
 input wire in_money_twenty,
 input wire in_money_fifty,
-input wire [2:0] rows_num,
-input wire [2:0] column_num,
-input wire [1:0] commodity_num,
-input [2:0] type_SW1,   //输入商品的编号 1 
-input [2:0] type_SW2,   //输入商品的编号 2 
+
+input [2:0] type_SW_high,   //输入商品的编号 高位
+input [2:0] type_SW_low,   //输入商品的编号 低位
 input [1:0] num_SW,     //输入商品的数量 
 
 
@@ -75,7 +74,7 @@ output [7:0] Seg_select
    wire money_fifty;
    wire total_money;
    wire [7:0] goods_code;//商品编号
-   assign goods_code={1'b0,type_SW1,1'b0,type_SW2}; 
+   assign goods_code={1'b0,type_SW_high,1'b0,type_SW_low}; 
  
    assign total_money={money_one,money_five,money_ten,money_twenty,money_fifty};
 
