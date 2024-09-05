@@ -35,9 +35,9 @@ module top_layer(
     input wire key_in_money_fifty,
 
     //goods input
-    input wire key_in_goods_high,
-    input wire key_in_goods_low,
-    input wire key_in_goods_num, // 商品数量
+    input wire [2:0] key_in_goods_high,
+    input wire [2:0] key_in_goods_low,
+    input wire [1:0] key_in_goods_num, // 商品数量
 
     // 输出端口
     output wire [7:0] bit_select,
@@ -49,6 +49,10 @@ module top_layer(
     wire [7:0] need_money;         // 所需金额  
     wire [7:0] input_money;        // 投币的总币值  
     wire [7:0] change_money;       // 找出多余金额  
+
+    wire [2:0] in_goods_high;      // 商品1 对应状态机中的SW1
+    wire [2:0] in_goods_low;       // 商品2 对应状态机中的SW2
+    wire [1:0] in_goods_num;       // 商品数量
 
     // Instantiation
     state_transitions transist(
@@ -63,9 +67,9 @@ module top_layer(
         .in_money_ten(money_ten),
         .in_money_twenty(money_twenty),
         .in_money_fifty(money_fifty),
-        .type_SW_high(key_in_goods_high), //商品1 对应状态机中的SW1
-        .type_SW_low(key_in_goods_low)  //商品2 对应状态机中的SW2
-        .num_SW(key_in_goods_num), //商品数量
+        .type_SW_high(in_goods_high), //商品1 对应状态机中的SW1
+        .type_SW_low(in_goods_low),  //商品2 对应状态机中的SW2
+        .num_SW(in_goods_num) //商品数量
     );
 
     display_design display(
@@ -77,7 +81,7 @@ module top_layer(
         .seg_select(seg_select)     // 显示屏选择段
     );
     
-    //money input jittering
+    // 输入钱 消抖
     key_filter one_key(
         .sys_clk(sys_clk),
         .key_in(key_in_money_one),
@@ -140,4 +144,61 @@ module top_layer(
         .key_posedge(sys_rst_n)
     );
 
+    // 选择商品编号、数目按键消抖
+
+    key_filter enum_1(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_high[0]),
+        .key_posedge(in_goods_high[0])
+    );
+
+    key_filter enum_2(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_high[1]),
+        .key_posedge(in_goods_high[1])
+    );
+
+    key_filter enum_3(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_high[2]),
+        .key_posedge(in_goods_high[2])
+    );
+
+    key_filter enum_4(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_low[0]),
+        .key_posedge(in_goods_low[0])
+    );
+
+    key_filter enum_5(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_low[1]),
+        .key_posedge(in_goods_low[1])
+    );
+
+    key_filter enum_6(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_low[2]),
+        .key_posedge(in_goods_low[2])
+    );
+
+    key_filter num(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_num[1]),
+        .key_posedge(in_goods_num[1])
+    );
+
+    key_filter num_0(
+
+        .sys_clk(sys_clk),
+        .key_in(key_in_goods_num[0]),
+        .key_posedge(in_goods_num[0])
+    );
 endmodule
