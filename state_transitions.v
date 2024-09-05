@@ -42,7 +42,11 @@ module state_transitions (
 
     //Êä³ö
     output [7:0] Bit_select,
-    output [7:0] Seg_select
+    output [7:0] Seg_select,
+    output wire [5:0] state_out,
+    output wire [7:0] need_money_out,
+    output wire [7:0] input_money_out,
+    output wire [7:0] change_money_out
 );
   //¶¨Òå×´Ì¬
   parameter IDLE = 6'b000001;
@@ -225,5 +229,8 @@ module state_transitions (
       end
     end
   end
-
+ assign need_money_out = need_money_buf;
+  assign input_money_out = input_money_buf;
+  assign change_money_out = change_money_buf;
+  assign state_out = state;
 endmodule
