@@ -50,12 +50,8 @@ state_transitions uut (
         .Seg_select(Seg_select),
         .input_money(input_money),
         .need_money(need_money),
-        //.change_money(change_money),
+        .change_money(change_money),     
         .state_out(state)
-        //.state_out(state_out),
-        //.need_money_out(need_money_out),
-        //.input_money_out(input_money_out),
-        //.change_money_out(change_money_out)
     );
 
     // 时钟生成
@@ -87,7 +83,7 @@ state_transitions uut (
         //#100 sys_rst_n = 1;
         //#10 sys_rst_n = 0;
          sys_rst_n = 0; // 初始状态为复位
-               // 其他信号初始化
+        // 其他信号初始化
 
                #10; // 保持复位信号一段时间
                sys_rst_n = 1; // 解除复位
@@ -107,6 +103,7 @@ state_transitions uut (
         #100 in_money_ten = 1; #10 in_money_ten = 0;
         #100 in_money_twenty = 1; #10 in_money_twenty = 0;
         #100 in_money_fifty = 1; #10 in_money_fifty = 0;
+        #100 sys_Confirm = 1; #10 sys_Confirm = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;

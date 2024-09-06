@@ -1,54 +1,30 @@
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 2024/08/29 21:55:00
-// Design Name: 
-// Module Name: fpga_test
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
-
 module state_transitions (
-    //ÊäÈë
+    // è¾“å…¥
     input wire sys_clk,
-    input wire sys_rst_n,    //¸´Î»-BTND 
-    input wire sys_Goods,    //ÉÌÆ·Ñ¡Ôñ¼ü-BTNL 
-    input wire sys_Confirm,  //È·ÈÏ-BTNU 
-    input wire sys_Change,   //ÕÒÁã°´¼ü-BTNR 
-    input wire sys_Cancel,   //È¡Ïû-BTNC 
-
+    input wire sys_rst_n,
+    input wire sys_Goods,
+    input wire sys_Confirm,
+    input wire sys_Change,
+    input wire sys_Cancel,
     input wire in_money_one,
     input wire in_money_five,
     input wire in_money_ten,
     input wire in_money_twenty,
     input wire in_money_fifty,
+    input [2:0] type_SW_high,
+    input [2:0] type_SW_low,
+    input [1:0] num_SW,
 
-    input [2:0] type_SW_high,   //ÊäÈëÉÌÆ·µÄ±àºÅ ¸ßÎ»
-    input [2:0] type_SW_low,   //ÊäÈëÉÌÆ·µÄ±àºÅ µÍÎ»
-    input [1:0] num_SW,     //ÊäÈëÉÌÆ·µÄÊıÁ¿ 
+    // è¾“å‡º
+    output reg [7:0] Bit_select,  // éœ€è¦åœ¨æ¨¡å—ä¸­å®šä¹‰
+    output reg [7:0] Seg_select,  // éœ€è¦åœ¨æ¨¡å—ä¸­å®šä¹‰
+    output wire [7:0] input_money,
+    output wire [7:0] need_money,
+    output wire [7:0] change_money,
+    output wire [5:0] state_out
 
-
-    //Êä³ö
-    output [7:0] Bit_select,
-    output [7:0] Seg_select,
-    output wire [5:0] state_out,
-    output wire [7:0] need_money_out,
-    output wire [7:0] input_money_out,
-    output wire [7:0] change_money_out
-);
-  //¶¨Òå×´Ì¬
+  );
+  //å®šä¹‰çŠ¶æ€
   parameter IDLE = 6'b000001;
   parameter GOODS_one = 6'b000010;
   parameter GOODS_two = 6'b000100;
@@ -57,15 +33,15 @@ module state_transitions (
   parameter TEMP = 6'b100000;
 
   reg  [5:0] state;
-  reg  [7:0] need_money_buf = 8'd0;  // ËùĞè½ğ¶î 
-  reg  [7:0] input_money_buf = 8'd0;  // Í¶±ÒµÄ×Ü±ÒÖµ 
-  reg  [7:0] change_money_buf = 8'd0;  // ÕÒ³ö¶àÓà½ğ¶î 
-  reg  [7:0] need_money_1 = 8'd0;  // ÉÌÆ· 1 ËùĞè½ğ¶î 
-  reg  [7:0] need_money_2 = 8'd0;  // ÉÌÆ· 2 ËùĞè½ğ¶î 
+  reg  [7:0] need_money_buf = 8'd0;  // æ‰€éœ€é‡‘é¢
+  reg  [7:0] input_money_buf = 8'd0;  // æŠ•å¸çš„æ€»å¸å€¼
+  reg  [7:0] change_money_buf = 8'd0;  // æ‰¾å‡ºå¤šä½™é‡‘é¢
+  reg  [7:0] need_money_1 = 8'd0;  // å•†å“ 1 æ‰€éœ€é‡‘é¢
+  reg  [7:0] need_money_2 = 8'd0;  // å•†å“ 2 æ‰€éœ€é‡‘é¢
 
-  wire [7:0] Price_Money;  // ¼ÛÇ®
-  wire [7:0] Input_Money;  // ÊäÈë¼ÛÇ® 
-  wire [7:0] Change_Money;  // ÕÒÁã 
+  // wire [7:0] need_money;  // ä»·é’±
+  //wire [7:0] input_money;  // è¾“å…¥ä»·é’±
+  wire [7:0] Change_Money;  // æ‰¾é›¶
   wire       Goods_btn;
   wire       Confirm_btn;
   wire       Change_btn;
@@ -76,163 +52,269 @@ module state_transitions (
   wire       money_twenty;
   wire       money_fifty;
   wire       total_money;
-  wire [7:0] goods_code;  // ÉÌÆ·±àºÅ
+  wire [7:0] goods_code;  // å•†å“ç¼–å·
   assign goods_code  = {1'b0, type_SW_high, 1'b0, type_SW_low};
 
   assign total_money = {money_one, money_five, money_ten, money_twenty, money_fifty};
 
 
   /*State Machine layer 1
- *Distinguish states, and state transform
-*/
+  *Distinguish states, and state transform
+  */
 
-  always @(posedge sys_clk or negedge sys_rst_n) // Òì²½¸´Î»£¬·Ö±ğÔÚÊ±ÖÓÉÏÉıÑØºÍ¸´Î»ĞÅºÅÏÂ½µÑØ´¥·¢  
-   begin
-    if (sys_rst_n) state <= IDLE;
-    else begin
+  always @(posedge sys_clk or negedge sys_rst_n) // å¼‚æ­¥å¤ä½ï¼Œåˆ†åˆ«åœ¨æ—¶é’Ÿä¸Šå‡æ²¿å’Œå¤ä½ä¿¡å·ä¸‹é™æ²¿è§¦å‘
+  begin
+    if (!sys_rst_n)
+      state <= IDLE;
+    else
+    begin
       case (state)
         IDLE:
-        if (sys_Confirm)  // ¼ÙÉèsys_ConfirmÎª¸ßµçÆ½ÓĞĞ§ÒÔ´¥·¢×´Ì¬×ª»»  
-          state <= GOODS_one;  // ´ÓIDLE×ªµ½GOODS_one  
+          if (sys_Confirm)
+          begin
+            state <= GOODS_one;  // ä»IDLEè½¬åˆ°GOODS_one
+          end
 
-        GOODS_one: begin
-          if (sys_Goods) begin
+        GOODS_one:
+        begin
+          if (sys_Goods)
+          begin
             state <= GOODS_two;
-          end else if (sys_Confirm) begin
+          end
+          else if (sys_Confirm)
+          begin
             need_money_buf <= need_money_1;
             state <= PAYMENT;
-          end else if (sys_Cancel) begin
-            state <= IDLE;    //°´ÏÂÈ¡Ïû¼ü£¬Ó¦µ±È¡Ïû¹ºÂò£¬´ËÊ±ºÍrst¼üÏàÍ¬
-          end else state <= GOODS_one;
+          end
+          else if(sys_Cancel)
+          begin
+            state <= IDLE;
+          end
+          else
+            state <= GOODS_one;
         end
 
-        GOODS_two: begin
-          if (sys_Cancel)  // ¼ÙÉèÊ¹ÓÃCancel¶ø²»ÊÇCancle×÷ÎªĞÅºÅÃû  
-            state <= GOODS_one;  // Ñ¡ÔñÉÌÆ· 1  
-          else if (sys_Confirm) begin
+        GOODS_two:
+        begin
+          if (sys_Cancel)
+            state <= GOODS_one;  // é€‰æ‹©å•†å“ 1
+          else if (sys_Confirm)
+          begin
             state <= PAYMENT;
-            need_money_buf <= need_money_1 + need_money_2;  // ¼ÆËã×ÜĞè½ğ¶î  
-          end else state <= GOODS_two;  // ±£³Öµ±Ç°×´Ì¬  
+            need_money_buf <= need_money_1 + need_money_2;  // è®¡ç®—æ€»éœ€é‡‘é¢
+          end
+          else
+            state <= GOODS_two;  // ä¿æŒå½“å‰çŠ¶æ€
         end
 
-        PAYMENT: begin
-          if (sys_Cancel) state <= TEMP;  // È¡Ïû²¢×ªµ½TEMP×´Ì¬  
+        PAYMENT:
+        begin
+          if (sys_Cancel)
+            state <= TEMP;  // å–æ¶ˆå¹¶è½¬åˆ°TEMPçŠ¶æ€
           else if (input_money_buf >= need_money_buf & sys_Confirm)
-            state <= CHANGE;  // Í¶±Ò×ã¹»£¬×ªµ½ÕÒÁã×´Ì¬  
-          else state <= PAYMENT;  // ±£³Öµ±Ç°×´Ì¬  
+            state <= CHANGE;  // æŠ•å¸è¶³å¤Ÿï¼Œè½¬åˆ°æ‰¾é›¶çŠ¶æ€
+          else
+            state <= PAYMENT;  // ä¿æŒå½“å‰çŠ¶æ€
         end
 
-        CHANGE: begin
-          if (change_money_buf == 0) state <= IDLE;  // ÕÒÁãÍê³É£¬»Øµ½IDLE×´Ì¬  
-          else state <= CHANGE;  // ¼ÌĞøÕÒÁã  
+        CHANGE:
+        begin
+          if (change_money_buf == 0)
+            state <= IDLE;  // æ‰¾é›¶å®Œæˆï¼Œå›åˆ°IDLEçŠ¶æ€
+          else
+            state <= CHANGE;  // ç»§ç»­æ‰¾é›¶
         end
 
-        TEMP: begin
-          if (sys_Confirm) state <= GOODS_one;  // ÖØĞÂÑ¡ÔñÉÌÆ·  
-          else if (sys_Change) // ¼ÙÉèÊ¹ÓÃsys_Change¶ø²»ÊÇsys_cancel×÷ÎªÊÖ¶¯ÕÒÁãµÄĞÅºÅÃû  
+        TEMP:
+        begin
+          if (sys_Confirm)
+            state <= GOODS_one;  // é‡æ–°é€‰æ‹©å•†å“
+          else if (sys_Change) // å‡è®¾ä½¿ç”¨sys_Changeè€Œä¸æ˜¯sys_cancelä½œä¸ºæ‰‹åŠ¨æ‰¾é›¶çš„ä¿¡å·å
             state <= CHANGE;
-          else state <= TEMP;  // ±£³Öµ±Ç°×´Ì¬  
+          else
+            state <= TEMP;  // ä¿æŒå½“å‰çŠ¶æ€
         end
 
-        default: state <= IDLE;  // ´¦ÀíÎ´Öª×´Ì¬£¬È·±£×´Ì¬»ú²»»á½øÈëÎ´Öª×´Ì¬  
+        default:
+          state <= IDLE;  // å¤„ç†æœªçŸ¥çŠ¶æ€ï¼Œç¡®ä¿çŠ¶æ€æœºä¸ä¼šè¿›å…¥æœªçŸ¥çŠ¶æ€
       endcase
     end
   end
   /* State Machine layer 2
- * Processing payment status
- * Adding different notes inserted by users, and store the final inserted price in the input_money_buf reg
- *
-*/
-  always @(posedge sys_clk or negedge sys_rst_n)  //ÉÌÆ·Ò»µÄ×´Ì¬´¦Àí 
-   begin
-    if (!sys_rst_n)  // Òì²½¸´Î»  
+  * Processing payment status
+  * Adding different notes inserted by users, and store the final inserted price in the input_money_buf reg
+  *
+  */
+  always @(posedge sys_clk or negedge sys_rst_n)  //å•†å“ä¸€çš„çŠ¶æ€å¤„ç†
+  begin
+    if (!sys_rst_n)  // å¼‚æ­¥å¤ä½
       need_money_1 <= 8'd0;
-    else if (state == GOODS_one) // µÚÒ»´ÎµÄÉÌÆ·ÊıÁ¿ºÍÖÖÀà  
-       begin
-      case (goods_code)  //calculate price,result stored in need_money_1  
-        8'h11:   need_money_1 <= num_SW * 8'd3;
-        8'h12:   need_money_1 <= num_SW * 8'd4;
-        8'h13:   need_money_1 <= num_SW * 8'd6;
-        8'h14:   need_money_1 <= num_SW * 8'd3;
-        8'h21:   need_money_1 <= num_SW * 8'd10;
-        8'h22:   need_money_1 <= num_SW * 8'd8;
-        8'h23:   need_money_1 <= num_SW * 8'd9;
-        8'h24:   need_money_1 <= num_SW * 8'd7;
-        8'h31:   need_money_1 <= num_SW * 8'd4;
-        8'h32:   need_money_1 <= num_SW * 8'd6;
-        8'h33:   need_money_1 <= num_SW * 8'd15;
-        8'h34:   need_money_1 <= num_SW * 8'd8;
-        8'h41:   need_money_1 <= num_SW * 8'd9;
-        8'h42:   need_money_1 <= num_SW * 8'd4;
-        8'h43:   need_money_1 <= num_SW * 8'd5;
-        8'h44:   need_money_1 <= num_SW * 8'd5;
-        default: need_money_1 <= 8'd0;
-      endcase
-    end
-  end
-
-  always @(posedge sys_clk or negedge sys_rst_n) begin  // ÉÌÆ·¶şµÄ×´Ì¬´¦Àí  
-    if (!sys_rst_n) begin  // Òì²½¸´Î»  
-      need_money_2 <= 8'd0;
-    end else if (state == GOODS_two) begin  // µÚ2´ÎµÄÉÌÆ·ÊıÁ¿ºÍÖÖÀà  
-      case (goods_code)  // ÉÌÆ·±àºÅ  
-        8'h11: need_money_2 <= num_SW * 8'd3;
-        8'h12: need_money_2 <= num_SW * 8'd4;
-        8'h13: need_money_2 <= num_SW * 8'd6;
-        8'h14: need_money_2 <= num_SW * 8'd3;
-        8'h21: need_money_2 <= num_SW * 8'd10;
-        8'h22: need_money_2 <= num_SW * 8'd8;
-        8'h23: need_money_2 <= num_SW * 8'd9;
-        8'h24: need_money_2 <= num_SW * 8'd7;
-        8'h31: need_money_2 <= num_SW * 8'd4;
-        8'h32: need_money_2 <= num_SW * 8'd6;
-        8'h33: need_money_2 <= num_SW * 8'd15;
-        8'h34: need_money_2 <= num_SW * 8'd8;
-        8'h41: need_money_2 <= num_SW * 8'd9;
-        8'h42: need_money_2 <= num_SW * 8'd4;
-        8'h43: need_money_2 <= num_SW * 8'd5;
-        8'h44: need_money_2 <= num_SW * 8'd5;
+    else if (state == GOODS_one) // ç¬¬ä¸€æ¬¡çš„å•†å“æ•°é‡å’Œç§ç±»
+    begin
+      case (goods_code)  //calculate price,result stored in need_money_1
+        8'h11:
+          need_money_1 <= num_SW * 8'd3;
+        8'h12:
+          need_money_1 <= num_SW * 8'd4;
+        8'h13:
+          need_money_1 <= num_SW * 8'd6;
+        8'h14:
+          need_money_1 <= num_SW * 8'd3;
+        8'h21:
+          need_money_1 <= num_SW * 8'd10;
+        8'h22:
+          need_money_1 <= num_SW * 8'd8;
+        8'h23:
+          need_money_1 <= num_SW * 8'd9;
+        8'h24:
+          need_money_1 <= num_SW * 8'd7;
+        8'h31:
+          need_money_1 <= num_SW * 8'd4;
+        8'h32:
+          need_money_1 <= num_SW * 8'd6;
+        8'h33:
+          need_money_1 <= num_SW * 8'd15;
+        8'h34:
+          need_money_1 <= num_SW * 8'd8;
+        8'h41:
+          need_money_1 <= num_SW * 8'd9;
+        8'h42:
+          need_money_1 <= num_SW * 8'd4;
+        8'h43:
+          need_money_1 <= num_SW * 8'd5;
+        8'h44:
+          need_money_1 <= num_SW * 8'd5;
         default:
-        need_money_2 <= 8'd0;  // Èç¹ûÃ»ÓĞÆ¥ÅäµÄgoods_code£¬½«need_money_2ÉèÖÃÎª0  
+          need_money_1 <= 8'd0;
+      endcase
+    end
+  end
+
+  always @(posedge sys_clk or negedge sys_rst_n)
+  begin  // å•†å“äºŒçš„çŠ¶æ€å¤„ç†
+    if (!sys_rst_n)
+    begin  // å¼‚æ­¥å¤ä½
+      need_money_2 <= 8'd0;
+    end
+    else if (state == GOODS_two)
+    begin  // ç¬¬2æ¬¡çš„å•†å“æ•°é‡å’Œç§ç±»
+      case (goods_code)  // å•†å“ç¼–å·
+        8'h11:
+          need_money_2 <= num_SW * 8'd3;
+        8'h12:
+          need_money_2 <= num_SW * 8'd4;
+        8'h13:
+          need_money_2 <= num_SW * 8'd6;
+        8'h14:
+          need_money_2 <= num_SW * 8'd3;
+        8'h21:
+          need_money_2 <= num_SW * 8'd10;
+        8'h22:
+          need_money_2 <= num_SW * 8'd8;
+        8'h23:
+          need_money_2 <= num_SW * 8'd9;
+        8'h24:
+          need_money_2 <= num_SW * 8'd7;
+        8'h31:
+          need_money_2 <= num_SW * 8'd4;
+        8'h32:
+          need_money_2 <= num_SW * 8'd6;
+        8'h33:
+          need_money_2 <= num_SW * 8'd15;
+        8'h34:
+          need_money_2 <= num_SW * 8'd8;
+        8'h41:
+          need_money_2 <= num_SW * 8'd9;
+        8'h42:
+          need_money_2 <= num_SW * 8'd4;
+        8'h43:
+          need_money_2 <= num_SW * 8'd5;
+        8'h44:
+          need_money_2 <= num_SW * 8'd5;
+        default:
+          need_money_2 <= 8'd0;  // å¦‚æœæ²¡æœ‰åŒ¹é…çš„goods_codeï¼Œå°†need_money_2è®¾ç½®ä¸º0
       endcase
     end
   end
 
 
-  always @(posedge sys_clk or negedge sys_rst_n) begin  // ¸¶¿îµÄ×´Ì¬´¦Àí  
-    if (!sys_rst_n) begin  // Òì²½¸´Î»  
+  always @(posedge sys_clk or negedge sys_rst_n)
+  begin  // ä»˜æ¬¾çš„çŠ¶æ€å¤„ç†
+    if (!sys_rst_n)
+    begin  // å¼‚æ­¥å¤ä½
       input_money_buf <= 8'd0;
-    end else if (state == PAYMENT) begin
+    end
+    else if (state == PAYMENT)
+    begin
       //Need display: show user the amount of inserted money
-      // Í¶±Ò×´Ì¬  
-      if (in_money_one) begin
+      // æŠ•å¸çŠ¶æ€
+      if (in_money_one)
+      begin
         input_money_buf <= input_money_buf + 8'd1;
-      end else if (in_money_five) begin
+      end
+      else if (in_money_five)
+      begin
         input_money_buf <= input_money_buf + 8'd5;
-      end else if (in_money_ten) begin
+      end
+      else if (in_money_ten)
+      begin
         input_money_buf <= input_money_buf + 8'd10;
-      end else if (in_money_twenty) begin
+      end
+      else if (in_money_twenty)
+      begin
         input_money_buf <= input_money_buf + 8'd20;
-      end else if (in_money_fifty) begin
+      end
+      else if (in_money_fifty)
+      begin
         input_money_buf <= input_money_buf + 8'd50;
-      end else begin
+      end
+      else
+      begin
       end
     end
   end
-  always @(posedge sys_clk or negedge sys_rst_n) begin
+  always @(posedge sys_clk or negedge sys_rst_n)
+  begin
     //Change & Refund
     //no rst
-    if (state == CHANGE) begin
-      if (input_money_buf > need_money_buf) begin
+    if (state == CHANGE)
+    begin
+      if (input_money_buf > need_money_buf)
+      begin
         change_money_buf <= input_money_buf - need_money_buf;
-        if (sys_Change) begin
-          change_money_buf <= change_money_buf - 8'd1;
+        if (sys_Change)
+        begin
+          if(change_money_buf >= 8'd50)
+          begin
+            change_money_buf <= change_money_buf - 8'd50;
+          end
+          else if (change_money_buf >= 8'd20)
+          begin
+            change_money_buf <= change_money_buf - 8'd20;
+          end
+          else if (change_money_buf >= 8'd10)
+          begin
+            change_money_buf <= change_money_buf - 8'd10;
+          end
+          else if (change_money_buf >= 8'd5)
+          begin
+            change_money_buf <= change_money_buf - 8'd5;
+          end
+          else if (change_money_buf >= 8'd1)
+          begin
+            change_money_buf <= change_money_buf - 8'd1;
+          end
+          else
+          begin
+            change_money_buf <= 8'd0;
+          end
         end
       end
     end
   end
- assign need_money_out = need_money_buf;
-  assign input_money_out = input_money_buf;
-  assign change_money_out = change_money_buf;
+  assign input_money = input_money_buf;  // æŠ•å¸çš„æ€»å¸å€¼
+  assign need_money = need_money_buf;
+  assign change_money = change_money_buf;  // æ‰¾å‡ºå¤šä½™é‡‘é¢
   assign state_out = state;
 endmodule
+
