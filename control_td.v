@@ -2,7 +2,7 @@
 
 module state_transitions_tb();
 
-    // ÊäÈëĞÅºÅ
+    // è¾“å…¥ä¿¡å·
     reg sys_clk;
     reg sys_rst_n;
     reg sys_Goods;
@@ -17,17 +17,21 @@ module state_transitions_tb();
     reg [2:0] type_SW_high;
     reg [2:0] type_SW_low;
     reg [1:0] num_SW;
+    reg[5:0] state_out;
+    reg[7:0] need_money_out;
+    reg[7:0] input_money_out;
+    reg[7:0] change_money_out;
+
+    // è¾“å‡ºä¿¡å·
+    wire [7:0] Bit_select;
+    wire [7:0] Seg_select;
     wire [7:0] input_money;
     wire [7:0] need_money;
     wire [7:0] change_money;
+    wire [5:0] state;
 
-    // Êä³öĞÅºÅ
-    wire [7:0] Bit_select;
-    wire [7:0] Seg_select;
-    wire [5:0] state; // Ôö¼Ó state Êä³öĞÅºÅ
-
-    // ÊµÀı»¯±»²âÊÔÄ£¿é
-    state_transitions uut (
+    // å®ä¾‹åŒ–è¢«æµ‹è¯•æ¨¡å—
+state_transitions uut (
         .sys_clk(sys_clk),
         .sys_rst_n(sys_rst_n),
         .sys_Goods(sys_Goods),
@@ -44,23 +48,27 @@ module state_transitions_tb();
         .num_SW(num_SW),
         .Bit_select(Bit_select),
         .Seg_select(Seg_select),
-        .input_money_out(input_money),
-        .state_out(state),
-        .need_money_out(need_money),
-        .change_money_out(change_money)
+        .input_money(input_money),
+        .need_money(need_money),
+        //.change_money(change_money),
+        .state_out(state)
+        //.state_out(state_out),
+        //.need_money_out(need_money_out),
+        //.input_money_out(input_money_out),
+        //.change_money_out(change_money_out)
     );
 
-    // Ê±ÖÓÉú³É
+    // æ—¶é’Ÿç”Ÿæˆ
     initial begin
         sys_clk = 0;
-        forever #5 sys_clk = ~sys_clk; // 100MHz Ê±ÖÓ
+        forever #5 sys_clk = ~sys_clk; // 100MHz æ—¶é’Ÿ
     end
 
-    // ²âÊÔ¼¤Àø
+    // æµ‹è¯•æ¿€åŠ±
     initial begin
-    $monitor("Time = %0t | state = %b | need_money_buf = %d | input_money_buf = %d | change_money_buf = %d | Bit_select = %b | Seg_select = %b",
-                 $time, uut.state, uut.need_money_buf, uut.input_money_buf, uut.change_money_buf, Bit_select, Seg_select);
-        // ³õÊ¼»¯ĞÅºÅ
+        $monitor("Time = %0t | state = %b | need_money = %d | input_money = %d | change_money = %d | Bit_select = %b | Seg_select = %b",
+                 $time, state, need_money, input_money, change_money, Bit_select, Seg_select);
+        // åˆå§‹åŒ–ä¿¡å·
         sys_rst_n = 0;
         sys_Goods = 0;
         sys_Confirm = 0;
@@ -75,11 +83,16 @@ module state_transitions_tb();
         type_SW_low = 3'b000;
         num_SW = 2'b00;
 
-        // ¼¤»î¸´Î»ĞÅºÅ²¢ËÉ¿ª
-        #100 sys_rst_n = 1;
-        #10 sys_rst_n = 0;
+        // æ¿€æ´»å¤ä½ä¿¡å·å¹¶æ¾å¼€
+        //#100 sys_rst_n = 1;
+        //#10 sys_rst_n = 0;
+         sys_rst_n = 0; // åˆå§‹çŠ¶æ€ä¸ºå¤ä½
+               // å…¶ä»–ä¿¡å·åˆå§‹åŒ–
 
-        // Ä£ÄâÊäÈëĞÅºÅ£¬ÑÓ³¤Ê±¼ä
+               #10; // ä¿æŒå¤ä½ä¿¡å·ä¸€æ®µæ—¶é—´
+               sys_rst_n = 1; // è§£é™¤å¤ä½
+
+        // æ¨¡æ‹Ÿè¾“å…¥ä¿¡å·ï¼Œå»¶é•¿æ—¶é—´
         #200 sys_Confirm = 1; #10 sys_Confirm = 0;
         #100 type_SW_high = 3'd2;
         #100 type_SW_low = 3'd1;
@@ -99,16 +112,8 @@ module state_transitions_tb();
         #100 sys_Change = 1; #10 sys_Change = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;
 
-        // ½áÊø·ÂÕæ
+        // ç»“æŸä»¿çœŸ
         #20000 $finish;
     end
 
-    // ¼àÊÓĞÅºÅµÄÖµ
-    initial begin
-        // ¼àÊÓ×´Ì¬¡¢ĞèÒª½ğ¶î¡¢ÊäÈë½ğ¶î¡¢ÕÒÁã½ğ¶îµÈ
-        $monitor("Time = %0t | state = %b | need_money_buf = %d | input_money_buf = %d | change_money_buf = %d | Bit_select = %b | Seg_select = %b",
-                 $time, uut.state, uut.need_money_buf, uut.input_money_buf, uut.change_money_buf, Bit_select, Seg_select);
-    end
-
 endmodule
-
