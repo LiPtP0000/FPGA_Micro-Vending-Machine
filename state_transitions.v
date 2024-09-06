@@ -101,6 +101,8 @@ module state_transitions (
           end else if (sys_Confirm) begin
             need_money_buf <= need_money_1;
             state <= PAYMENT;
+          end else if (sys_Cancel) begin
+            state <= IDLE;    //按下取消键，应当取消购买，此时和rst键相同
           end else state <= GOODS_one;
         end
 
