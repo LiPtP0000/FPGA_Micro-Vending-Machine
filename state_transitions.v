@@ -25,23 +25,20 @@ module state_transitions (
 
   );
   //定义状态
-  parameter IDLE = 6'b000001;
-  parameter GOODS_one = 6'b000010;
-  parameter GOODS_two = 6'b000100;
-  parameter PAYMENT = 6'b001000;
-  parameter CHANGE = 6'b010000;
-  parameter TEMP = 6'b100000;
+  parameter IDLE = 6'b000001;       //01H
+  parameter GOODS_one = 6'b000010;  //02H
+  parameter GOODS_two = 6'b000100;  //04H
+  parameter PAYMENT = 6'b001000;    //08H
+  parameter CHANGE = 6'b010000;     //10H
+  parameter TEMP = 6'b100000;       //20H
 
   reg  [5:0] state;
   reg  [7:0] need_money_buf = 8'd0;  // 所需金额
   reg  [7:0] input_money_buf = 8'd0;  // 投币的总币值
-  reg  [7:0] change_money_buf = 8'd0;  // 找出多余金额
+  reg  [7:0] change_money_buf = 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
   reg  [7:0] need_money_1 = 8'd0;  // 商品 1 所需金额
   reg  [7:0] need_money_2 = 8'd0;  // 商品 2 所需金额
-
-  // wire [7:0] need_money;  // 价钱
-  //wire [7:0] input_money;  // 输入价钱
-  wire [7:0] Change_Money;  // 找零
+  reg        flag = 1'd1;
   wire       Goods_btn;
   wire       Confirm_btn;
   wire       Change_btn;
@@ -83,7 +80,6 @@ module state_transitions (
           end
           else if (sys_Confirm)
           begin
-            need_money_buf <= need_money_1;
             state <= PAYMENT;
           end
           else if(sys_Cancel)
@@ -101,7 +97,7 @@ module state_transitions (
           else if (sys_Confirm)
           begin
             state <= PAYMENT;
-            need_money_buf <= need_money_1 + need_money_2;  // 计算总需金额
+
           end
           else
             state <= GOODS_two;  // 保持当前状态
@@ -120,16 +116,16 @@ module state_transitions (
         CHANGE:
         begin
           if (change_money_buf == 0)
-            state <= IDLE;  // 找零完成，回到IDLE状态
+            #20 state <= IDLE;  // 找零完成，回到IDLE状态
           else
             state <= CHANGE;  // 继续找零
         end
 
         TEMP:
         begin
-          if (sys_Confirm)
-            state <= GOODS_one;  // 重新选择商品
-          else if (sys_Change) // 假设使用sys_Change而不是sys_cancel作为手动找零的信号名
+          if (sys_Cancel)
+            state <= IDLE;  // 重新选择商品
+          else if (sys_Confirm) // 假设使用sys_Change而不是sys_cancel作为手动找零的信号名
             state <= CHANGE;
           else
             state <= TEMP;  // 保持当前状态
@@ -244,6 +240,25 @@ module state_transitions (
     begin  // 异步复位
       input_money_buf <= 8'd0;
     end
+    else if (state == IDLE)
+    begin
+      need_money_buf <= 8'd0;     // 所需金额
+      input_money_buf <= 8'd0;    // 投币的总币值
+      change_money_buf <= 8'd0;   // 找出多余金额，不赋值为0，防止竞争条件
+      flag <= 1'd1;               // 重置flag
+    end
+    else if (state == GOODS_one)
+    begin
+      need_money_buf <= need_money_1;  // 商品 1 所需金额
+      input_money_buf <= 8'd0;  // 投币的总币值
+      change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+    end
+    else if (state == GOODS_two)
+    begin
+      need_money_buf <= need_money_1+need_money_2;  // 商品 2 所需金额
+      input_money_buf <= 8'd0;  // 投币的总币值
+      change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+    end
     else if (state == PAYMENT)
     begin
       //Need display: show user the amount of inserted money
@@ -272,16 +287,15 @@ module state_transitions (
       begin
       end
     end
-  end
-  always @(posedge sys_clk or negedge sys_rst_n)
-  begin
-    //Change & Refund
-    //no rst
-    if (state == CHANGE)
+    else if (state == CHANGE)
     begin
       if (input_money_buf > need_money_buf)
       begin
-        change_money_buf <= input_money_buf - need_money_buf;
+        if(flag)
+        begin
+          change_money_buf <= input_money_buf - need_money_buf;
+          flag=1'd0;
+        end
         if (sys_Change)
         begin
           if(change_money_buf >= 8'd50)

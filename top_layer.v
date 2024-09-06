@@ -41,7 +41,10 @@ module top_layer(
 
     // 输出端口
     output wire [7:0] bit_select,
-    output wire [7:0] seg_select
+    output wire [7:0] seg_select,
+
+    //状态LED输出
+    output wire [5:0] state_out
 );
     wire money_one, money_five, money_ten, money_twenty, money_fifty;
     wire sys_rst_n, sys_Goods, sys_Confirm, sys_Change, sys_Cancel;
@@ -69,8 +72,12 @@ module top_layer(
         .in_money_fifty(money_fifty),
         .type_SW_high(in_goods_high), //商品1 对应状态机中的SW1
         .type_SW_low(in_goods_low),  //商品2 对应状态机中的SW2
-        .num_SW(in_goods_num) //商品数量
+        .num_SW(in_goods_num),  //商品数量
+        .Bit_select(bit_select),
+        .Seg_select(seg_select),
+        .state_out(state_out)
     );
+    
 
     display_design display(
         .sys_clk(sys_clk),

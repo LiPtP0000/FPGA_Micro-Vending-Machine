@@ -82,11 +82,11 @@ state_transitions uut (
         // 激活复位信号并松开
         //#100 sys_rst_n = 1;
         //#10 sys_rst_n = 0;
-         sys_rst_n = 0; // 初始状态为复位
+        sys_rst_n = 0; // 初始状态为复位
         // 其他信号初始化
 
-               #10; // 保持复位信号一段时间
-               sys_rst_n = 1; // 解除复位
+        #10; // 保持复位信号一段时间
+        sys_rst_n = 1; // 解除复位
 
         // 模拟输入信号，延长时间
         #200 sys_Confirm = 1; #10 sys_Confirm = 0;
@@ -108,7 +108,26 @@ state_transitions uut (
         #100 sys_Change = 1; #10 sys_Change = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;
         #100 sys_Change = 1; #10 sys_Change = 0;
+        #2000;
+        sys_rst_n = 0; // 初始状态为复位
+        #10; // 保持复位信号一段时间
+        sys_rst_n = 1; // 解除复位
+        #10000
+        // simulation #2 test cancel
+        
+        #100 sys_Confirm=1; #10 sys_Confirm=0;
+        #100 type_SW_high=3'd4;
+        #100 type_SW_low=3'd1;
 
+        #100 num_SW=3'd3;
+        #100 sys_Confirm=1; #10 sys_Confirm=0;
+        #100 in_money_fifty=1; #10 in_money_fifty=0;
+        #100 
+        #100 sys_Cancel=1; #10 sys_Cancel=0;
+        #100 sys_Confirm=1; #10 sys_Confirm=0;
+        #2000 sys_Change=1; #10 sys_Change=0;
+        #2000 sys_Change=1; #10 sys_Change=0;
+        #2000 sys_Change=1; #10 sys_Change=0;
         // 结束仿真
         #20000 $finish;
     end

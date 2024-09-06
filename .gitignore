@@ -322,3 +322,5 @@ TSWLatexianTemp*
 *.sim
 *.xpr
 *.wcfg
+*.runs
+*.srcs
