@@ -314,3 +314,10 @@ TSWLatexianTemp*
 
 # VS Code Settings
 *.vscode
+*.code-workspace
+# Vivado Files
+*.cache
+*.hw
+*.ip_user_files
+*.sim
+*.xpr
