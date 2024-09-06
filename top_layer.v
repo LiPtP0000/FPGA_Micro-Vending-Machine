@@ -21,19 +21,9 @@
 module top_layer(
     //通过约束文件确定接口
     input wire sys_clk,    //系统时钟-CLK 
-    input wire key_Cancel,  //取消-BTNC 
-    input wire key_Confirm, //确认-BTNU 
-    input wire key_Change,  //找零按键-BTNR 
-    input wire key_Goods,   //商品选择键-BTNL 
-    input wire key_Rst,     //复位-BTND 
-
+    input wire [4:0] key_button,  //按键输入
     //input money
-    input wire key_in_money_one,
-    input wire key_in_money_five,
-    input wire key_in_money_ten,
-    input wire key_in_money_twenty,
-    input wire key_in_money_fifty,
-
+    input wire [4:0] key_in_money,
     //goods input
     input wire [2:0] key_in_goods_high,
     input wire [2:0] key_in_goods_low,
@@ -46,8 +36,8 @@ module top_layer(
     //状态LED输出
     output wire [5:0] state_out
 );
-    wire money_one, money_five, money_ten, money_twenty, money_fifty;
-    wire sys_rst_n, sys_Goods, sys_Confirm, sys_Change, sys_Cancel;
+    wire [4:0] money;
+    wire [4:0] sys;
 
     wire [7:0] need_money;         // 所需金额  
     wire [7:0] input_money;        // 投币的总币值  
@@ -60,22 +50,23 @@ module top_layer(
     // Instantiation
     state_transitions transist(
         .sys_clk(sys_clk),
-        .sys_rst_n(sys_rst_n),
-        .sys_Goods(sys_Goods),
-        .sys_Confirm(sys_Confirm),
-        .sys_Change(sys_Change),
-        .sys_Cancel(sys_Cancel),
-        .in_money_one(money_one),
-        .in_money_five(money_five),
-        .in_money_ten(money_ten),
-        .in_money_twenty(money_twenty),
-        .in_money_fifty(money_fifty),
+        .sys_rst_n(sys[0]),
+        .sys_Goods(sys[1]),
+        .sys_Confirm(sys[2]),
+        .sys_Change(sys[3]),
+        .sys_Cancel(sys[4]),
+        .in_money_one(money[0]),
+        .in_money_five(money[1]),
+        .in_money_ten(money[2]),
+        .in_money_twenty(money[3]),
+        .in_money_fifty(money[4]),
         .type_SW_high(in_goods_high), //商品1 对应状态机中的SW1
         .type_SW_low(in_goods_low),  //商品2 对应状态机中的SW2
         .num_SW(in_goods_num),  //商品数量
-        .Bit_select(bit_select),
-        .Seg_select(seg_select),
-        .state_out(state_out)
+        .state_out(state_out),
+        .need_money(need_money),
+        .input_money(input_money),
+        .change_money(change_money)
     );
     
 
@@ -89,123 +80,62 @@ module top_layer(
     );
     
     // 输入钱 消抖
-    key_filter one_key(
-        .sys_clk(sys_clk),
-        .key_in(key_in_money_one),
-        .key_posedge(money_one)
-    );
-
-    key_filter five_key(
-        .sys_clk(sys_clk),
-        .key_in(key_in_money_five),
-        .key_posedge(money_five)
-    );
-
-    key_filter ten_key(
-        .sys_clk(sys_clk),
-        .key_in(key_in_money_ten),
-        .key_posedge(money_ten)
-    );
-
-    key_filter twenty_key(
-        .sys_clk(sys_clk),
-        .key_in(key_in_money_twenty),
-        .key_posedge(money_twenty)
-    );
-
-    key_filter fifty_key(
-        .sys_clk(sys_clk),
-        .key_in(key_in_money_fifty),
-        .key_posedge(money_fifty)
-    );
-
+    genvar i;
+    generate
+        for (i = 0; i < 5; i = i + 1) begin : money_key_filter
+            key_filter money_key(
+                .sys_clk(sys_clk),
+                .key_in(key_in_money[i]),
+                .key_posedge(money[i])
+            );
+        end
+    endgenerate
+ 
     //选择商品按键
-
-    key_filter Confirm(
-        .sys_clk(sys_clk),
-        .key_in(key_Confirm),
-        .key_posedge(sys_Confirm)
-    );
-
-    key_filter Goods(
-        .sys_clk(sys_clk),
-        .key_in(key_Goods),
-        .key_posedge(sys_Goods)
-    );
-
-    key_filter Cancel(
-        .sys_clk(sys_clk),
-        .key_in(key_Cancel),
-        .key_posedge(sys_Cancel)
-    );
-
-    key_filter Change(
-        .sys_clk(sys_clk),
-        .key_in(key_Change),
-        .key_posedge(sys_Change)
-    );
-
-    key_filter Rst(
-        .sys_clk(sys_clk),
-        .key_in(key_Rst),
-        .key_posedge(sys_rst_n)
-    );
+    generate
+        for(i=0;i<5;i=i+1)
+        begin : button_filter
+            key_filter button(
+                .sys_clk(sys_clk),
+                .key_in(key_button[i]),
+                .key_posedge(sys[i])
+            );
+        end
+    endgenerate
 
     // 选择商品编号、数目按键消抖
+   
+    generate
+        for(i=0;i<=2;i=i+1)
+        begin : goods_key_filter
+            key_filter goods_key(
+                .sys_clk(sys_clk),
+                .key_in(key_in_goods_high[i]),
+                .key_posedge(in_goods_high[i])
+            );
+        end
+    endgenerate
 
-    key_filter enum_1(
+    generate
+        for(i=0;i<=2;i=i+1)
+        begin : goods_key_filter_low
+            key_filter goods_key_low(
+                .sys_clk(sys_clk),
+                .key_in(key_in_goods_low[i]),
+                .key_posedge(in_goods_low[i])
+            );
+        end
+    endgenerate
 
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_high[0]),
-        .key_posedge(in_goods_high[0])
-    );
-
-    key_filter enum_2(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_high[1]),
-        .key_posedge(in_goods_high[1])
-    );
-
-    key_filter enum_3(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_high[2]),
-        .key_posedge(in_goods_high[2])
-    );
-
-    key_filter enum_4(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_low[0]),
-        .key_posedge(in_goods_low[0])
-    );
-
-    key_filter enum_5(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_low[1]),
-        .key_posedge(in_goods_low[1])
-    );
-
-    key_filter enum_6(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_low[2]),
-        .key_posedge(in_goods_low[2])
-    );
-
-    key_filter num(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_num[1]),
-        .key_posedge(in_goods_num[1])
-    );
-
-    key_filter num_0(
-
-        .sys_clk(sys_clk),
-        .key_in(key_in_goods_num[0]),
-        .key_posedge(in_goods_num[0])
-    );
+    generate
+        for(i=0;i<=1;i=i+1)
+        begin : goods_key_filter_num
+            key_filter goods_key_num(
+                .sys_clk(sys_clk),
+                .key_in(key_in_goods_num[i]),
+                .key_posedge(in_goods_num[i])
+            );
+        end
+    endgenerate
+    
 endmodule

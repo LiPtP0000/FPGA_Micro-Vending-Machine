@@ -1,11 +1,11 @@
 module state_transitions (
     // 输入
     input wire sys_clk,
-    input wire sys_rst_n,
-    input wire sys_Goods,
-    input wire sys_Confirm,
-    input wire sys_Change,
-    input wire sys_Cancel,
+    input wire sys_rst_n,   //BTNU
+    input wire sys_Goods,   //BTNL
+    input wire sys_Confirm, //BTNR
+    input wire sys_Change,   //BTND
+    input wire sys_Cancel, //BTNC
     input wire in_money_one,
     input wire in_money_five,
     input wire in_money_ten,
@@ -16,8 +16,6 @@ module state_transitions (
     input [1:0] num_SW,
 
     // 输出
-    output reg [7:0] Bit_select,  // 需要在模块中定义
-    output reg [7:0] Seg_select,  // 需要在模块中定义
     output wire [7:0] input_money,
     output wire [7:0] need_money,
     output wire [7:0] change_money,
@@ -33,11 +31,11 @@ module state_transitions (
   parameter TEMP = 6'b100000;       //20H
 
   reg  [5:0] state;
-  reg  [7:0] need_money_buf = 8'd0;  // 所需金额
+  (*keep*) reg  [7:0] need_money_buf = 8'd0;  // 所需金额
   reg  [7:0] input_money_buf = 8'd0;  // 投币的总币值
   reg  [7:0] change_money_buf = 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
-  reg  [7:0] need_money_1 = 8'd0;  // 商品 1 所需金额
-  reg  [7:0] need_money_2 = 8'd0;  // 商品 2 所需金额
+  (*keep*) reg  [7:0] need_money_1 = 8'd0;  // 商品 1 所需金额
+  (*keep*) reg  [7:0] need_money_2 = 8'd0;  // 商品 2 所需金额
   reg        flag = 1'd1;
   wire       Goods_btn;
   wire       Confirm_btn;
@@ -54,14 +52,14 @@ module state_transitions (
 
   assign total_money = {money_one, money_five, money_ten, money_twenty, money_fifty};
 
-
+  
   /*State Machine layer 1
   *Distinguish states, and state transform
   */
 
-  always @(posedge sys_clk or negedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发
+  always @(posedge sys_clk or posedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发
   begin
-    if (!sys_rst_n)
+    if (sys_rst_n)
       state <= IDLE;
     else
     begin
@@ -141,9 +139,9 @@ module state_transitions (
   * Adding different notes inserted by users, and store the final inserted price in the input_money_buf reg
   *
   */
-  always @(posedge sys_clk or negedge sys_rst_n)  //商品一的状态处理
+  always @(posedge sys_clk or posedge sys_rst_n)  //商品一的状态处理
   begin
-    if (!sys_rst_n)  // 异步复位
+    if (sys_rst_n)  // 异步复位
       need_money_1 <= 8'd0;
     else if (state == GOODS_one) // 第一次的商品数量和种类
     begin
@@ -186,9 +184,9 @@ module state_transitions (
     end
   end
 
-  always @(posedge sys_clk or negedge sys_rst_n)
+  always @(posedge sys_clk or posedge sys_rst_n)
   begin  // 商品二的状态处理
-    if (!sys_rst_n)
+    if (sys_rst_n)
     begin  // 异步复位
       need_money_2 <= 8'd0;
     end
@@ -234,13 +232,9 @@ module state_transitions (
   end
 
 
-  always @(posedge sys_clk or negedge sys_rst_n)
+  always @(posedge sys_clk or posedge sys_rst_n)
   begin  // 付款的状态处理
-    if (!sys_rst_n)
-    begin  // 异步复位
-      input_money_buf <= 8'd0;
-    end
-    else if (state == IDLE)
+    if (state == IDLE || sys_rst_n)
     begin
       need_money_buf <= 8'd0;     // 所需金额
       input_money_buf <= 8'd0;    // 投币的总币值

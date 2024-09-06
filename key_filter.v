@@ -30,7 +30,7 @@ parameter CNT_MAX = 20'hf_ffff;  // 约定20位的计数值
 
 // 内部寄存器定义
 reg [1:0] key_in_r;        // 用于存储按键输入的两个时钟周期值
-reg [19:0] cnt_base;       // 延迟计数器，用于计数按键稳定时间
+(*keep*) reg [19:0] cnt_base;       // 延迟计数器，用于计数按键稳定时间
 reg key_value_r;           // 按键值寄存器，用于保存消抖后的按键值
 reg key_value_rd;          // 按键值寄存器，用于保存前一周期的按键值
 
