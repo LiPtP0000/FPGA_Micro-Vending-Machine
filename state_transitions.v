@@ -17,11 +17,12 @@ module state_transitions (
 
     // 输出
     output wire [7:0] input_money,
-    output wire [7:0] need_money,
+    output reg [6:0] need_money,
     output wire [7:0] change_money,
     output wire [5:0] state_out
-
   );
+
+
   //定义状态
   parameter IDLE = 6'b000001;       //01H
   parameter GOODS_one = 6'b000010;  //02H
@@ -31,28 +32,19 @@ module state_transitions (
   parameter TEMP = 6'b100000;       //20H
 
   reg  [5:0] state;
-  (*keep*) reg  [7:0] need_money_buf = 8'd0;  // 所需金额
+  reg  [6:0] need_money_buf = 7'd0;  // 所需金额
   reg  [7:0] input_money_buf = 8'd0;  // 投币的总币值
   reg  [7:0] change_money_buf = 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
-  (*keep*) reg  [7:0] need_money_1 = 8'd0;  // 商品 1 所需金额
-  (*keep*) reg  [7:0] need_money_2 = 8'd0;  // 商品 2 所需金额
+  reg  [5:0] need_money_1 = 6'd0;  // 商品 1 所需金额
+  reg  [5:0] need_money_2 = 6'd0;  // 商品 2 所需金额
   reg        flag = 1'd1;
-  wire       Goods_btn;
-  wire       Confirm_btn;
-  wire       Change_btn;
-  wire       Cancle_btn;
-  wire       money_one;
-  wire       money_five;
-  wire       money_ten;
-  wire       money_twenty;
-  wire       money_fifty;
-  wire       total_money;
+
+  assign input_money = input_money_buf;  // 投币的总币值
+  assign change_money = change_money_buf;  // 找出多余金额
+  assign state_out = state;
   wire [7:0] goods_code;  // 商品编号
   assign goods_code  = {1'b0, type_SW_high, 1'b0, type_SW_low};
 
-  assign total_money = {money_one, money_five, money_ten, money_twenty, money_fifty};
-
-  
   /*State Machine layer 1
   *Distinguish states, and state transform
   */
@@ -113,8 +105,8 @@ module state_transitions (
 
         CHANGE:
         begin
-          if (change_money_buf == 0)
-            #20 state <= IDLE;  // 找零完成，回到IDLE状态
+          if (change_money_buf == 0 & sys_Change)
+            state <= IDLE;  // 找零完成，回到IDLE状态
           else
             state <= CHANGE;  // 继续找零
         end
@@ -142,44 +134,44 @@ module state_transitions (
   always @(posedge sys_clk or posedge sys_rst_n)  //商品一的状态处理
   begin
     if (sys_rst_n)  // 异步复位
-      need_money_1 <= 8'd0;
+      need_money_1 <= 6'd0;
     else if (state == GOODS_one) // 第一次的商品数量和种类
     begin
       case (goods_code)  //calculate price,result stored in need_money_1
         8'h11:
-          need_money_1 <= num_SW * 8'd3;
+          need_money_1 <= num_SW * 6'd3;
         8'h12:
-          need_money_1 <= num_SW * 8'd4;
+          need_money_1 <= num_SW * 6'd4;
         8'h13:
-          need_money_1 <= num_SW * 8'd6;
+          need_money_1 <= num_SW * 6'd6;
         8'h14:
-          need_money_1 <= num_SW * 8'd3;
+          need_money_1 <= num_SW * 6'd3;
         8'h21:
-          need_money_1 <= num_SW * 8'd10;
+          need_money_1 <= num_SW * 6'd10;
         8'h22:
-          need_money_1 <= num_SW * 8'd8;
+          need_money_1 <= num_SW * 6'd8;
         8'h23:
-          need_money_1 <= num_SW * 8'd9;
+          need_money_1 <= num_SW * 6'd9;
         8'h24:
-          need_money_1 <= num_SW * 8'd7;
+          need_money_1 <= num_SW * 6'd7;
         8'h31:
-          need_money_1 <= num_SW * 8'd4;
+          need_money_1 <= num_SW * 6'd4;
         8'h32:
-          need_money_1 <= num_SW * 8'd6;
+          need_money_1 <= num_SW * 6'd6;
         8'h33:
-          need_money_1 <= num_SW * 8'd15;
+          need_money_1 <= num_SW * 6'd15;
         8'h34:
-          need_money_1 <= num_SW * 8'd8;
+          need_money_1 <= num_SW * 6'd8;
         8'h41:
-          need_money_1 <= num_SW * 8'd9;
+          need_money_1 <= num_SW * 6'd9;
         8'h42:
-          need_money_1 <= num_SW * 8'd4;
+          need_money_1 <= num_SW * 6'd4;
         8'h43:
-          need_money_1 <= num_SW * 8'd5;
+          need_money_1 <= num_SW * 6'd5;
         8'h44:
-          need_money_1 <= num_SW * 8'd5;
+          need_money_1 <= num_SW * 6'd5;
         default:
-          need_money_1 <= 8'd0;
+          need_money_1 <= 6'd0;
       endcase
     end
   end
@@ -188,45 +180,45 @@ module state_transitions (
   begin  // 商品二的状态处理
     if (sys_rst_n)
     begin  // 异步复位
-      need_money_2 <= 8'd0;
+      need_money_2 <= 6'd0;
     end
     else if (state == GOODS_two)
     begin  // 第2次的商品数量和种类
       case (goods_code)  // 商品编号
         8'h11:
-          need_money_2 <= num_SW * 8'd3;
+          need_money_2 <= num_SW * 6'd3;
         8'h12:
-          need_money_2 <= num_SW * 8'd4;
+          need_money_2 <= num_SW * 6'd4;
         8'h13:
-          need_money_2 <= num_SW * 8'd6;
+          need_money_2 <= num_SW * 6'd6;
         8'h14:
-          need_money_2 <= num_SW * 8'd3;
+          need_money_2 <= num_SW * 6'd3;
         8'h21:
-          need_money_2 <= num_SW * 8'd10;
+          need_money_2 <= num_SW * 6'd10;
         8'h22:
-          need_money_2 <= num_SW * 8'd8;
+          need_money_2 <= num_SW * 6'd8;
         8'h23:
-          need_money_2 <= num_SW * 8'd9;
+          need_money_2 <= num_SW * 6'd9;
         8'h24:
-          need_money_2 <= num_SW * 8'd7;
+          need_money_2 <= num_SW * 6'd7;
         8'h31:
-          need_money_2 <= num_SW * 8'd4;
+          need_money_2 <= num_SW * 6'd4;
         8'h32:
-          need_money_2 <= num_SW * 8'd6;
+          need_money_2 <= num_SW * 6'd6;
         8'h33:
-          need_money_2 <= num_SW * 8'd15;
+          need_money_2 <= num_SW * 6'd15;
         8'h34:
-          need_money_2 <= num_SW * 8'd8;
+          need_money_2 <= num_SW * 6'd8;
         8'h41:
-          need_money_2 <= num_SW * 8'd9;
+          need_money_2 <= num_SW * 6'd9;
         8'h42:
-          need_money_2 <= num_SW * 8'd4;
+          need_money_2 <= num_SW * 6'd4;
         8'h43:
-          need_money_2 <= num_SW * 8'd5;
+          need_money_2 <= num_SW * 6'd5;
         8'h44:
-          need_money_2 <= num_SW * 8'd5;
+          need_money_2 <= num_SW * 6'd5;
         default:
-          need_money_2 <= 8'd0;  // 如果没有匹配的goods_code，将need_money_2设置为0
+          need_money_2 <= 6'd0;  // 如果没有匹配的goods_code，将need_money_2设置为0
       endcase
     end
   end
@@ -236,93 +228,95 @@ module state_transitions (
   begin  // 付款的状态处理
     if (state == IDLE || sys_rst_n)
     begin
-      need_money_buf <= 8'd0;     // 所需金额
+      need_money_buf <= 7'd0;     // 所需金额
       input_money_buf <= 8'd0;    // 投币的总币值
       change_money_buf <= 8'd0;   // 找出多余金额，不赋值为0，防止竞争条件
       flag <= 1'd1;               // 重置flag
     end
-    else if (state == GOODS_one)
+    else
     begin
-      need_money_buf <= need_money_1;  // 商品 1 所需金额
-      input_money_buf <= 8'd0;  // 投币的总币值
-      change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
-    end
-    else if (state == GOODS_two)
-    begin
-      need_money_buf <= need_money_1+need_money_2;  // 商品 2 所需金额
-      input_money_buf <= 8'd0;  // 投币的总币值
-      change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
-    end
-    else if (state == PAYMENT)
-    begin
-      //Need display: show user the amount of inserted money
-      // 投币状态
-      if (in_money_one)
-      begin
-        input_money_buf <= input_money_buf + 8'd1;
-      end
-      else if (in_money_five)
-      begin
-        input_money_buf <= input_money_buf + 8'd5;
-      end
-      else if (in_money_ten)
-      begin
-        input_money_buf <= input_money_buf + 8'd10;
-      end
-      else if (in_money_twenty)
-      begin
-        input_money_buf <= input_money_buf + 8'd20;
-      end
-      else if (in_money_fifty)
-      begin
-        input_money_buf <= input_money_buf + 8'd50;
-      end
-      else
-      begin
-      end
-    end
-    else if (state == CHANGE)
-    begin
-      if (input_money_buf > need_money_buf)
-      begin
-        if(flag)
+      case (state)
+        GOODS_one:
         begin
-          change_money_buf <= input_money_buf - need_money_buf;
-          flag=1'd0;
+          input_money_buf <= 8'd0;  // 投币的总币值
+          change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+          need_money_buf <= need_money_1;  // 商品 1 所需金额
+          need_money <= need_money_buf;
         end
-        if (sys_Change)
+        GOODS_two:
         begin
-          if(change_money_buf >= 8'd50)
+          input_money_buf <= 8'd0;  // 投币的总币值
+          change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+          need_money_buf <= need_money_2+need_money_1;  // 商品 2 所需金额
+          need_money <= need_money_buf;
+        end
+        PAYMENT:
+        begin
+          if (in_money_one)
           begin
-            change_money_buf <= change_money_buf - 8'd50;
+            input_money_buf <= input_money_buf + 8'd1;
           end
-          else if (change_money_buf >= 8'd20)
+          else if (in_money_five)
           begin
-            change_money_buf <= change_money_buf - 8'd20;
+            input_money_buf <= input_money_buf + 8'd5;
           end
-          else if (change_money_buf >= 8'd10)
+          else if (in_money_ten)
           begin
-            change_money_buf <= change_money_buf - 8'd10;
+            input_money_buf <= input_money_buf + 8'd10;
           end
-          else if (change_money_buf >= 8'd5)
+          else if (in_money_twenty)
           begin
-            change_money_buf <= change_money_buf - 8'd5;
+            input_money_buf <= input_money_buf + 8'd20;
           end
-          else if (change_money_buf >= 8'd1)
+          else if (in_money_fifty)
           begin
-            change_money_buf <= change_money_buf - 8'd1;
+            input_money_buf <= input_money_buf + 8'd50;
           end
           else
           begin
-            change_money_buf <= 8'd0;
           end
         end
-      end
+
+        CHANGE:
+        begin
+          if (input_money_buf > need_money_buf)
+          begin
+            if(flag)
+            begin
+              change_money_buf <= input_money_buf - need_money_buf;
+              flag=1'd0;
+            end
+            if (sys_Change)
+            begin
+              if(change_money_buf >= 8'd50)
+              begin
+                change_money_buf <= change_money_buf - 8'd50;
+              end
+              else if (change_money_buf >= 8'd20)
+              begin
+                change_money_buf <= change_money_buf - 8'd20;
+              end
+              else if (change_money_buf >= 8'd10)
+              begin
+                change_money_buf <= change_money_buf - 8'd10;
+              end
+              else if (change_money_buf >= 8'd5)
+              begin
+                change_money_buf <= change_money_buf - 8'd5;
+              end
+              else if (change_money_buf >= 8'd1)
+              begin
+                change_money_buf <= change_money_buf - 8'd1;
+              end
+              else
+              begin
+                change_money_buf <= 8'd0;
+              end
+            end
+          end
+        end
+      endcase
     end
   end
-  assign input_money = input_money_buf;  // 投币的总币值
-  assign need_money = need_money_buf;
-  assign change_money = change_money_buf;  // 找出多余金额
-  assign state_out = state;
 endmodule
 

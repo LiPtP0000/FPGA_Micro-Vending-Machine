@@ -22,7 +22,7 @@
 module display_design(  
     // 显示模块接口  
     input sys_clk,   
-    input [7:0] need_money,         // 所需金额  
+    input [6:0] need_money,         // 所需金额  
     input [7:0] input_money,        // 投币的总币值  
     input [7:0] change_money,       // 找出多余金额  
     output reg [7:0] bit_select,    // 数码管位选  

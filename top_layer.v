@@ -39,10 +39,9 @@ module top_layer(
     wire [4:0] money;
     wire [4:0] sys;
 
-    wire [7:0] need_money;         // 所需金额  
+    wire [6:0] need_money;         // 所需金额  
     wire [7:0] input_money;        // 投币的总币值  
     wire [7:0] change_money;       // 找出多余金额  
-
     wire [2:0] in_goods_high;      // 商品1 对应状态机中的SW1
     wire [2:0] in_goods_low;       // 商品2 对应状态机中的SW2
     wire [1:0] in_goods_num;       // 商品数量
