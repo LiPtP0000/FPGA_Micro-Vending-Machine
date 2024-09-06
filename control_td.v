@@ -17,9 +17,9 @@ module state_transitions_tb();
     reg [2:0] type_SW_high;
     reg [2:0] type_SW_low;
     reg [1:0] num_SW;
-    reg [7:0] input_money;
-    reg [7:0] need_money;
-    reg [7:0] change_money;
+    wire [7:0] input_money;
+    wire [7:0] need_money;
+    wire [7:0] change_money;
 
     // Êä³öÐÅºÅ
     wire [7:0] Bit_select;
