@@ -13,7 +13,6 @@ module LED_display #(
     output wire RGB2_Blue,
     output wire RGB2_Green,
     output wire RGB2_Red,
-    output wire LED_num ,
     output [15:0] LED_btn  // 16个按键LED灯输出端口
   );
   // 状态定义
