@@ -47,9 +47,9 @@ set_property -dict {PACKAGE_PIN V11 IOSTANDARD LVCMOS33} [get_ports {LED_out[15]
 set_property -dict {PACKAGE_PIN R12 IOSTANDARD LVCMOS33} [get_ports RGB1_Blue]
 set_property -dict {PACKAGE_PIN M16 IOSTANDARD LVCMOS33} [get_ports RGB1_Green]
 set_property -dict {PACKAGE_PIN N15 IOSTANDARD LVCMOS33} [get_ports RGB1_Red]
-set_property -dict {PACKAGE_PIN G14 IOSTANDARD LVCMOS33} [get_ports RGB2_Blue]
-set_property -dict {PACKAGE_PIN R11 IOSTANDARD LVCMOS33} [get_ports RGB2_Green]
-set_property -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS33} [get_ports RGB2_Red]
+# set_property -dict {PACKAGE_PIN G14 IOSTANDARD LVCMOS33} [get_ports RGB2_Blue]
+# set_property -dict {PACKAGE_PIN R11 IOSTANDARD LVCMOS33} [get_ports RGB2_Green]
+# set_property -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS33} [get_ports RGB2_Red]
 
 
 ## 7-segment display (用于数码管显示)

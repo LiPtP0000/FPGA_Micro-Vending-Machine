@@ -37,10 +37,10 @@ module top_layer(
     output wire [15:0] LED_out,
     output wire RGB1_Blue,
     output wire RGB1_Green,
-    output wire RGB1_Red,
-    output wire RGB2_Blue,
-    output wire RGB2_Green,
-    output wire RGB2_Red
+    output wire RGB1_Red
+    // output wire RGB2_Blue,
+    // output wire RGB2_Green,
+    // output wire RGB2_Red
   );
   wire [4:0] money;
   wire [4:0] sys;
@@ -81,27 +81,27 @@ module top_layer(
                    .input_money(input_money),
                    .change_money(change_money),
                    .bit_select(bit_select),    // 显示屏选择位
-                   .seg_select(seg_select)     // 显示屏选择段
+                   .seg_select(seg_select),     // 显示屏选择段
                    .state(state_out),
                    .in_goods_high(in_goods_high),
                    .in_goods_low(in_goods_low),
                    .in_goods_num(in_goods_num)
                  );
 
-  LED_design LED(
+  LED_display LED(
                .sys_clk(sys_clk),
                .sys_rst_n(sys[0]),
-               in_goods_high(in_goods_high),
-               in_goods_low(in_goods_low),
-               in_goods_num(in_goods_num),
+               .in_goods_high(in_goods_high),
+               .in_goods_low(in_goods_low),
+               .in_goods_num(in_goods_num),
                .state(state_out),
                .LED_btn(LED_out),
                .RGB1_Blue(RGB1_Blue),
                .RGB1_Green(RGB1_Green),
-               .RGB1_Red(RGB1_Red),
-               .RGB2_Blue(RGB2_Blue),
-               .RGB2_Green(RGB2_Green),
-               .RGB2_Red(RGB2_Red)
+               .RGB1_Red(RGB1_Red)
+              //  .RGB2_Blue(RGB2_Blue),
+              //  .RGB2_Green(RGB2_Green),
+              //  .RGB2_Red(RGB2_Red)
              );
   // 输入钱 消抖
   genvar i;
