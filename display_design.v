@@ -77,7 +77,7 @@ end
 reg [4:0] display_num = 5'd0;  
 always @(posedge sys_clk) begin
     case (state)
-        6'b001000, 6'b010000, 6'b100000,'b000001:begin
+        6'b001000, 6'b010000, 6'b100000,6'b000001:begin
             // 当前状态 001000, 010000, 100000 的显示逻辑
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
