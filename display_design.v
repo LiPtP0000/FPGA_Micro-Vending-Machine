@@ -22,16 +22,13 @@
 module display_design(  
     // 显示模块接口  
     input sys_clk,   
-    input [7:0] need_money,         // 所需金额  
+    input [6:0] need_money,         // 所需金额  
     input [7:0] input_money,        // 投币的总币值  
     input [7:0] change_money,       // 找出多余金额
-    input [6:0] state,
-    input [3:0] goods_one_high,
-    input [3:0] goods_one_low,
-    input [3:0] goods_two_high,
-    input [3:0] goods_two_low,
-    input [1:0] goods_one_num,
-    input [1:0] goods_two_num,
+    input [5:0] state,
+    input [2:0] in_goods_high,
+    input [2:0] in_goods_low,
+    input [1:0] in_goods_num,
     output reg [7:0] bit_select,    // 数码管位选  
     output reg [7:0] seg_select     // 数码管段选  
 );  
@@ -96,13 +93,13 @@ always @(posedge sys_clk) begin
             // 依次显示 A, goods_one_high, goods_one_low, goods_one_num, A, goods_two_high, goods_two_low, goods_two_num
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= 5'd10; end  // A
-                3'd1: begin bit_select <= 8'b11111101; display_num <= goods_one_high; end  // goods_one_high
-                3'd2: begin bit_select <= 8'b11111011; display_num <= goods_one_low; end  // goods_one_low
-                3'd3: begin bit_select <= 8'b11110111; display_num <= goods_one_num; end  // goods_one_num
-                3'd4: begin bit_select <= 8'b11101111; display_num <= 5'd10; end  // A
-                3'd5: begin bit_select <= 8'b11011111; display_num <= goods_two_high; end  // goods_two_high
-                3'd6: begin bit_select <= 8'b10111111; display_num <= goods_two_low; end  // goods_two_low
-                3'd7: begin bit_select <= 8'b01111111; display_num <= goods_two_num; end  // goods_two_num
+                3'd1: begin bit_select <= 8'b11111101; display_num <= in_goods_high; end  
+                3'd2: begin bit_select <= 8'b11111011; display_num <= in_goods_low; end  
+                3'd3: begin bit_select <= 8'b11110111; display_num <= 5'd16; end  
+                3'd4: begin bit_select <= 8'b11101111; display_num <= 5'd16; end  
+                3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // goods_two_high
+                3'd6: begin bit_select <= 8'b10111111; display_num <= 5'd16; end  // goods_two_low
+                3'd7: begin bit_select <= 8'b01111111; display_num <= in_goods_num; end  // goods_two_num
                 default: bit_select <= 8'b11111111;
             endcase
         end

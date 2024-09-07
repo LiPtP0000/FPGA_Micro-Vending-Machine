@@ -248,7 +248,7 @@ module state_transitions (
           input_money_buf <= 8'd0;  // 投币的总币值
           change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
           need_money_buf <= need_money_1;  // 商品 1 所需金额
-          need_money <= 7'd99;
+          need_money <= 7'd0;
         end
         GOODS_two:
         begin
