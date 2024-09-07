@@ -1,5 +1,5 @@
 module LED_display #(
-    parameter CNT_MAX = 25'24_999_999;
+    parameter CNT_MAX = 25'd49_999_999;
 )(
     input sys_clk,
     input sys_rst_n,
@@ -46,7 +46,7 @@ module LED_display #(
     else
       cnt_flag <= 1'b0;
 
-      
+
   // 16个按键LED灯模块
   always(posedge sys_clk or posedge sys_rst_n)
   begin
