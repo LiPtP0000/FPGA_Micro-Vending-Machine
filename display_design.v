@@ -70,7 +70,7 @@ end
  reg [4:0] display_num = 5'd0;  
     always @(posedge sys_clk) begin  
     case (sig_num)  
-        3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
+        3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  // for TEST ONLY 
         3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
         3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // ÏÔÊ¾ ¿Õ¸ñ"-"  
         3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  

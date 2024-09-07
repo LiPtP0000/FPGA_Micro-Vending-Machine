@@ -226,7 +226,7 @@ module state_transitions (
 
   always @(posedge sys_clk or posedge sys_rst_n)
   begin  // 付款的状态处理
-    if (state == IDLE || sys_rst_n)
+    if (sys_rst_n)
     begin
       need_money_buf <= 7'd0;     // 所需金额
       input_money_buf <= 8'd0;    // 投币的总币值
@@ -236,12 +236,19 @@ module state_transitions (
     else
     begin
       case (state)
+        IDLE:
+        begin
+          input_money_buf <= 8'd0;  // 投币的总币值
+          change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+          need_money_buf <= 7'd0;  // 所需金额
+          flag <= 1'd1;  // 重置flag
+        end
         GOODS_one:
         begin
           input_money_buf <= 8'd0;  // 投币的总币值
           change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
           need_money_buf <= need_money_1;  // 商品 1 所需金额
-          need_money <= need_money_buf;
+          need_money <= 7'd99;
         end
         GOODS_two:
         begin
