@@ -9,7 +9,7 @@
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: General Display module for 7-segment displayer
+// Description: 
 // 
 // Dependencies: 
 // 
@@ -22,9 +22,16 @@
 module display_design(  
     // 显示模块接口  
     input sys_clk,   
-    input [6:0] need_money,         // 所需金额  
+    input [7:0] need_money,         // 所需金额  
     input [7:0] input_money,        // 投币的总币值  
-    input [7:0] change_money,       // 找出多余金额  
+    input [7:0] change_money,       // 找出多余金额
+    input [6:0] state,
+    input [3:0] goods_one_high,
+    input [3:0] goods_one_low,
+    input [3:0] goods_two_high,
+    input [3:0] goods_two_low,
+    input [1:0] goods_one_num,
+    input [1:0] goods_two_num,
     output reg [7:0] bit_select,    // 数码管位选  
     output reg [7:0] seg_select     // 数码管段选  
 );  
@@ -67,20 +74,46 @@ end
 // ------------------------------------------  
 // 数码管位选和显示数字逻辑  
 // ------------------------------------------  
- reg [4:0] display_num = 5'd0;  
-    always @(posedge sys_clk) begin  
-    case (sig_num)  
-        3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
-        3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
-        3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // 显示 空格"-"  
-        3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
-        3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
-        3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // 显示 空格"-"  
-        3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
-        3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
-        default: bit_select <= 8'b11111111;  
-    endcase  
-end  
+reg [4:0] display_num = 5'd0;  
+always @(posedge sys_clk) begin
+    case (state)
+        6'b001000, 6'b010000, 6'b100000,'b000001:begin
+            // 当前状态 001000, 010000, 100000 的显示逻辑
+            case (sig_num)
+                3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
+                3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
+                3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // 显示 空格"-"
+                3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
+                3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
+                3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // 显示 空格"-"
+                3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
+                3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
+                default: bit_select <= 8'b11111111;  
+            endcase
+        end
+        6'b000010, 6'b000100: begin
+            // 依次显示 A, goods_one_high, goods_one_low, goods_one_num, A, goods_two_high, goods_two_low, goods_two_num
+            case (sig_num)
+                3'd0: begin bit_select <= 8'b11111110; display_num <= 5'd10; end  // A
+                3'd1: begin bit_select <= 8'b11111101; display_num <= goods_one_high; end  // goods_one_high
+                3'd2: begin bit_select <= 8'b11111011; display_num <= goods_one_low; end  // goods_one_low
+                3'd3: begin bit_select <= 8'b11110111; display_num <= goods_one_num; end  // goods_one_num
+                3'd4: begin bit_select <= 8'b11101111; display_num <= 5'd10; end  // A
+                3'd5: begin bit_select <= 8'b11011111; display_num <= goods_two_high; end  // goods_two_high
+                3'd6: begin bit_select <= 8'b10111111; display_num <= goods_two_low; end  // goods_two_low
+                3'd7: begin bit_select <= 8'b01111111; display_num <= goods_two_num; end  // goods_two_num
+                default: bit_select <= 8'b11111111;
+            endcase
+        end
+
+        default: begin
+            // 默认状态下关闭所有显示
+            bit_select <= 8'b11111111;
+            display_num <= 5'd16;  // 空格
+        end
+    endcase
+end
+
   
 // ------------------------------------------  
 // 数码管段选输出  
