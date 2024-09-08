@@ -19,47 +19,46 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 module KEY_FILTER(
-    input wire sys_clk,       // ϵͳʱ��
-    // input wire sys_rst_n,     // ȫ�ָ�λ
-    input wire key_in,        // ���������ź�
-    output reg key_posedge    // �������⵽������������
+    input wire sys_clk,       
+    input wire key_in,        // 输入按键信号
+    output reg key_posedge    // 消抖后输出
 );
-
-// ���������ֵ������Ϊ����ʱ�䣨����20ms���ļ���ֵ
-parameter CNT_MAX = 20'hf_ffff;  // Լ��20λ�ļ���ֵ
-
-// �ڲ��Ĵ�������
-reg [1:0] key_in_r;        // ���ڴ洢�������������ʱ������ֵ
-(*keep*) reg [19:0] cnt_base;       // �ӳټ����������ڼ��������ȶ�ʱ��
-reg key_value_r;           // ����ֵ�Ĵ��������ڱ���������İ���ֵ
-reg key_value_rd;          // ����ֵ�Ĵ��������ڱ���ǰһ���ڵİ���ֵ
-
-// ��¼���������źŵ�����״̬�����ڱ��ؼ��
+ 
+// 计数器最大值
+parameter CNT_MAX = 20'hf_ffff;
+ 
+// 寄存器定义
+reg [1:0] key_in_r;        
+(*keep*) reg [19:0] cnt_base;       
+reg key_value_r;           
+reg key_value_rd;          
+ 
+// 按键信号同步处理
 always @(posedge sys_clk) begin
-     key_in_r <= {key_in_r[0], key_in};  // ��λ�Ĵ������水�������ǰ����״̬
+     key_in_r <= {key_in_r[0], key_in};
 end
-
-// �ӳټ������߼�������⵽����״̬�����仯ʱ������������
+ 
+// 按键信号变化，那么开始计数
 always @(posedge sys_clk) begin  
     if (key_in_r[0] != key_in_r[1])
-        cnt_base <= 20'b0;  // �������״̬�����仯������������
+        cnt_base <= 20'b0;  
     else if (cnt_base < CNT_MAX)
-        cnt_base <= cnt_base + 1'b1;  // �������������
+        cnt_base <= cnt_base + 1'b1;  
 end
-
-// ����ֵ�Ĵ����߼������ӳټ������ﵽ���ֵʱ�����°���״̬
+ 
+// 按键稳定状态检测，当计数器达到最大值时，认为按键稳定
 always @(posedge sys_clk) begin
     if (cnt_base == CNT_MAX)
-        key_value_r <= key_in_r[0];  // ���������ﵽ���ֵʱ���°���״̬
+        key_value_r <= key_in_r[0];  
 end
-
-// ������һ��ʱ�����ڵİ���ֵ�����ڱ��ؼ��
+ 
+// 寄存此时按键值，用于下一时钟周期的按键稳定状态检测
 always @(posedge sys_clk) begin
-        key_value_rd <= key_value_r;  // ������һ�����ڵİ���ֵ
+        key_value_rd <= key_value_r;  
 end
-
-// ��ⰴ����������
+ 
+// 仅允许上升沿触发按键
 always @(posedge sys_clk) begin
-        key_posedge <= key_value_r & ~key_value_rd;  // ���ڰ���ֵ��0��Ϊ1ʱ����ߵ�ƽ
+        key_posedge <= key_value_r & ~key_value_rd;  
 end
 endmodule

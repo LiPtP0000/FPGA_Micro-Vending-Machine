@@ -64,9 +64,7 @@ module STATE_TRANSITIONS (
   wire [7:0] goods_code;  // 商品编号
   assign goods_code  = {1'b0, type_SW_high, 1'b0, type_SW_low};
 
-  /*State Machine layer 1
-  *Distinguish states, and state transform
-  */
+  //FSM
 
   always @(posedge sys_clk or posedge sys_rst_n) // 异步复位，分别在时钟上升沿和复位信号下降沿触发
   begin
@@ -75,13 +73,13 @@ module STATE_TRANSITIONS (
     else
     begin
       case (state)
-        IDLE:
+        IDLE:// 初始状态
           if (sys_Confirm)
           begin
-            state <= GOODS_one;  // 从IDLE转到GOODS_one
+            state <= GOODS_one;  
           end
 
-        GOODS_one:
+        GOODS_one:// 选择商品一
         begin
           if (sys_Goods)
           begin
@@ -99,64 +97,61 @@ module STATE_TRANSITIONS (
             state <= GOODS_one;
         end
 
-        GOODS_two:
+        GOODS_two:// 选择商品二
         begin
           if (sys_Cancel)
-            state <= GOODS_one;  // 选择商品 1
+            state <= GOODS_one;  
           else if (sys_Confirm)
           begin
             state <= PAYMENT;
 
           end
           else
-            state <= GOODS_two;  // 保持当前状态
+            state <= GOODS_two;  
         end
 
-        PAYMENT:
+        PAYMENT:// 付款状态
         begin
           if (sys_Cancel)
             state <= TEMP;  // 取消并转到TEMP状态
           else if (input_money_buf >= need_money_buf & sys_Confirm)
             state <= CHANGE;  // 投币足够，转到找零状态
           else
-            state <= PAYMENT;  // 保持当前状态
+            state <= PAYMENT;  // 投币不足够，保持当前状态
         end
 
-        CHANGE:
+        CHANGE: // 找零
         begin
           if (change_money_buf == 0 & sys_Change)
-            state <= IDLE;  // 找零完成，回到IDLE状态
+            state <= IDLE;  // upd: 增加一个change键
           else
-            state <= CHANGE;  // 继续找零
+            state <= CHANGE;  
         end
 
-        TEMP:
+        TEMP: // 待定状态
         begin
           if (sys_Cancel)
             state <= GOODS_one;  // 重新选择商品
-          else if (sys_Confirm) // 假设使用sys_Change而不是sys_cancel作为手动找零的信号名
+          else if (sys_Confirm) // 开始退款
             state <= CHANGE;
           else
-            state <= TEMP;  // 保持当前状态
+            state <= TEMP;  
         end
 
         default:
-          state <= IDLE;  // 处理未知状态，确保状态机不会进入未知状态
+          state <= IDLE;  
       endcase
     end
   end
-  /* State Machine layer 2
-  * Processing payment status
-  * Adding different notes inserted by users, and store the final inserted price in the input_money_buf reg
-  *
-  */
+  
+
   always @(posedge sys_clk or posedge sys_rst_n)  //商品一的状态处理
   begin
-    if (sys_rst_n)  // 异步复位
+    if (sys_rst_n)  
       need_money_1 <= 6'd0;
-    else if (state == GOODS_one) // 第一次的商品数量和种类
+    else if (state == GOODS_one) 
     begin
-      case (goods_code)  //calculate price,result stored in need_money_1
+      case (goods_code)  
         8'h11:
           need_money_1 <= num_SW * 6'd3;
         8'h12:
@@ -198,12 +193,12 @@ module STATE_TRANSITIONS (
   always @(posedge sys_clk or posedge sys_rst_n)
   begin  // 商品二的状态处理
     if (sys_rst_n)
-    begin  // 异步复位
+    begin  
       need_money_2 <= 6'd0;
     end
     else if (state == GOODS_two)
-    begin  // 第2次的商品数量和种类
-      case (goods_code)  // 商品编号
+    begin  
+      case (goods_code)  
         8'h11:
           need_money_2 <= num_SW * 6'd3;
         8'h12:
@@ -237,7 +232,7 @@ module STATE_TRANSITIONS (
         8'h44:
           need_money_2 <= num_SW * 6'd5;
         default:
-          need_money_2 <= 6'd0;  // 如果没有匹配的goods_code，将need_money_2设置为0
+          need_money_2 <= 6'd0;  
       endcase
     end
   end
@@ -249,7 +244,7 @@ module STATE_TRANSITIONS (
     begin
       need_money_buf <= 7'd0;     // 所需金额
       input_money_buf <= 8'd0;    // 投币的总币值
-      change_money_buf <= 8'd0;   // 找出多余金额，不赋值为0，防止竞争条件
+      change_money_buf <= 8'd0;   // 找出多余金额
       flag <= 1'd1;               // 重置flag
     end
     else
@@ -265,7 +260,7 @@ module STATE_TRANSITIONS (
         end
         GOODS_one:
         begin
-         //不需要处理input ，防止吞钱
+          //不需要处理input，防止吞钱
           change_money_buf <= 8'd0;  // 找出多余金额
           need_money_buf <= need_money_1;  // 商品 1 所需金额
           need_money <= need_money_buf;
@@ -277,7 +272,7 @@ module STATE_TRANSITIONS (
           need_money_buf <= need_money_2+need_money_1;  // 商品 2 所需金额
           need_money <= need_money_buf;
         end
-        PAYMENT:
+        PAYMENT: // 付款状态，计算总输入价格
         begin
           if (in_money_one)
           begin
@@ -304,7 +299,7 @@ module STATE_TRANSITIONS (
           end
         end
 
-        CHANGE:
+        CHANGE: // 找零，实时计算找零金额
         begin
           if (input_money_buf > need_money_buf)
           begin
@@ -344,8 +339,8 @@ module STATE_TRANSITIONS (
         end
         TEMP:
         begin
-          need_money_buf <= 7'd0;  
-          need_money <= 7'd0;  // 取消购买
+          need_money_buf <= 7'd0;
+          need_money <= 7'd0;  // 无论取消购买还是不取消，所需金额都已经过时，故为设计方便直接取消
         end
 
       endcase

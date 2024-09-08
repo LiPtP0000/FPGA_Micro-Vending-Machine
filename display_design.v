@@ -40,11 +40,11 @@ parameter SEG_0 = 8'b1100_0000, SEG_1 = 8'b1111_1001,
             SEG_A = 8'b1000_1000, SEG_B = 8'b1000_0011, 
             SEG_C = 8'b1100_0110, SEG_D = 8'b1010_0001, 
             SEG_E = 8'b1000_0110, SEG_F = 8'b1000_1110,
-            SEG_S = 8'b1011_1111, SEG_r = 8'b1010_1111, // S= space
-            SEG_o = 8'b1010_0011, SEG_n = 8'b1111_1111, // nothing
-            SEG_ot =8'b1001_1100, SEG_left = 8'b1111_1100, // o=overtime, left=left arrow
+            SEG_S = 8'b1011_1111, SEG_r = 8'b1010_1111, 
+            SEG_o = 8'b1010_0011, SEG_n = 8'b1111_1111, 
+            SEG_ot =8'b1001_1100, SEG_left = 8'b1111_1100, 
             SEG_right = 8'b1101_1110, SEG_happy =8'b1110_0011,
-            SEG_sad = 8'b1010_1011; // happy=happy face, sad=sad face
+            SEG_sad = 8'b1010_1011; 
 
 
 // ------------------------------------------  
