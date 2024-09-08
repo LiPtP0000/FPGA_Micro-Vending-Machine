@@ -1,6 +1,24 @@
 `timescale 1ns / 1ps
-
-module state_transitions_tb();
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date: 2024/9/4 11:17
+// Design Name:
+// Module Name: STATE_TRANSITIONS_tb
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description: Testbench for state_transitions module
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module STATE_TRANSITIONS_tb();
 
     // 输入信号
     reg sys_clk;
