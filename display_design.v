@@ -18,9 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-//主要思路是动态循环显示
-module DISPLAY_DESIGN(  
-    // 显示模块接口  
+module DISPLAY_DESIGN(    
     input sys_clk,   
     input [6:0] need_money,         // 所需金额  
     input [7:0] input_money,        // 投币的总币值  
@@ -32,6 +30,7 @@ module DISPLAY_DESIGN(
     output reg [7:0] bit_select,    // 数码管位选  
     output reg [7:0] seg_select     // 数码管段选  
 );  
+  
 //定义16进制的显示编码
 parameter SEG_0 = 8'b1100_0000, SEG_1 = 8'b1111_1001, 
             SEG_2 = 8'b1010_0100, SEG_3 = 8'b1011_0000, 
@@ -40,15 +39,18 @@ parameter SEG_0 = 8'b1100_0000, SEG_1 = 8'b1111_1001,
             SEG_8 = 8'b1000_0000, SEG_9 = 8'b1001_0000, 
             SEG_A = 8'b1000_1000, SEG_B = 8'b1000_0011, 
             SEG_C = 8'b1100_0110, SEG_D = 8'b1010_0001, 
-            SEG_E = 8'b1000_0110, SEG_F = 8'b1000_1110,//16进制
+            SEG_E = 8'b1000_0110, SEG_F = 8'b1000_1110,
             SEG_S = 8'b1011_1111, SEG_r = 8'b1010_1111, // S= space
             SEG_o = 8'b1010_0011, SEG_n = 8'b1111_1111, // nothing
             SEG_ot =8'b1001_1100, SEG_left = 8'b1111_1100, // o=overtime, left=left arrow
             SEG_right = 8'b1101_1110, SEG_happy =8'b1110_0011,
             SEG_sad = 8'b1010_1011; // happy=happy face, sad=sad face
+
+
 // ------------------------------------------  
 // 分频器，将时钟信号频率降低用于扫描数码管  
 // ------------------------------------------  
+  
 reg [17:0] count_num = 17'd0; 
 reg [25:0] count_o = 26'd0;  
 always @(posedge sys_clk) begin  
@@ -59,6 +61,7 @@ always @(posedge sys_clk) begin
     end  
 end  
 reg status = 1'b0;  
+  
 // ------------------------------------------  
 // 循环扫描不同数码管  
 // ------------------------------------------  
@@ -74,11 +77,11 @@ always @(posedge sys_clk) begin
 end  
  
 // ------------------------------------------  
-// 数码管动态显示 'o'
+//  'o' 的动态显示
 // ------------------------------------------ 
-reg [7:0] display_o = 8'b0000_0001; // 下面 'o' 的位置 
-reg [7:0] display_ot = 8'b1000_0000; // 上面 'o' 的位置 
-//分频器
+reg [7:0] display_o = 8'b0000_0001; // 下面的o，从右往左
+reg [7:0] display_ot = 8'b1000_0000; // 上面的o 
+// 计时 0.5s
 always @(posedge sys_clk) begin 
     if(count_o == 26'd49_999_999) begin
         count_o <= 26'd0;
@@ -88,7 +91,7 @@ always @(posedge sys_clk) begin
         end
 end
 
-//状态机
+// 状态切换
 always @(posedge sys_clk) begin
     if (count_o == 26'd49_999_999) begin
         if(display_o == 8'b1000_0000) begin
@@ -100,18 +103,18 @@ always @(posedge sys_clk) begin
     end
 end
 
-
+// 'o' 的移动
 always @(posedge sys_clk) begin
     if(count_o == 26'd49_999_999) begin
         if(status == 1'b1) begin
-            if(display_ot == 8'b0000_0001) begin//上面的 'o' 显示完毕
+            if(display_ot == 8'b0000_0001) begin
                 display_ot <= 8'b1000_0000;
                 display_o <= 8'b0000_0001;
             end else begin
                 display_ot <= display_ot >> 1;
             end
         end else begin
-            if(display_o == 8'b1000_0000) begin//下面的 'o' 显示完毕
+            if(display_o == 8'b1000_0000) begin
                 display_o <= 8'b0000_0001;
                 display_ot <= 8'b1000_0000;
             end else begin
@@ -128,7 +131,7 @@ reg [4:0] display_num = 5'd0;
 always @(posedge sys_clk) begin
     case (state)
         6'b000001: begin
-            // 当前状态 IDLE 的显示逻辑
+            // IDLE 状态：流水灯显示
             if(status == 1'b0) begin
                 case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= display_o[0] == 1'b1 ? 5'd18 : 5'd19; end  
@@ -156,7 +159,6 @@ always @(posedge sys_clk) begin
             end
         end
         6'b001000, 6'b010000, 6'b100000:begin
-            // 当前状态 001000, 010000, 100000 的显示逻辑
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
                 3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
@@ -170,22 +172,23 @@ always @(posedge sys_clk) begin
             endcase
         end
         6'b000010, 6'b000100: begin
-            // 依次显示 A, goods_one_high, goods_one_low, goods_one_num, A, goods_two_high, goods_two_low, goods_two_num
+            // 判断商品输入是否有效
             if(in_goods_low >= 3'd1 && in_goods_low <= 3'd4 && in_goods_high >= 3'd1 && in_goods_high <= 3'd4 ) begin
+              // 商品显示
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= 5'd22; end  // 
                 3'd1: begin bit_select <= 8'b11111101; display_num <= 5'd23; end  
                 3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd21; end  
                 3'd3: begin bit_select <= 8'b11110111; display_num <= in_goods_num; end  
                 3'd4: begin bit_select <= 8'b11101111; display_num <= 5'd16; end  
-                3'd5: begin bit_select <= 8'b11011111; display_num <= in_goods_low; end  // goods_two_high
-                3'd6: begin bit_select <= 8'b10111111; display_num <= in_goods_high; end  // goods_two_low
+                3'd5: begin bit_select <= 8'b11011111; display_num <= in_goods_low; end  
+                3'd6: begin bit_select <= 8'b10111111; display_num <= in_goods_high; end  
                 3'd7: begin bit_select <= 8'b01111111; display_num <= 5'd10; end  // A
                 default: bit_select <= 8'b11111111;
             endcase
         end
         else begin
-            // 其他状态下显示 Error
+            // Error 显示
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= 5'd22; end  // 
                 3'd1: begin bit_select <= 8'b11111101; display_num <= 5'd24; end  // 
