@@ -38,9 +38,6 @@ module TOP_LAYER(
     output wire RGB1_Blue,
     output wire RGB1_Green,
     output wire RGB1_Red
-    // output wire RGB2_Blue,
-    // output wire RGB2_Green,
-    // output wire RGB2_Red
   );
   wire [4:0] money;
   wire [4:0] sys;
@@ -57,7 +54,7 @@ module TOP_LAYER(
   assign in_goods_num = key_in_goods_num;
 
   
-  // Instantiation
+  // 例化
 
   STATE_TRANSITIONS transist(
                       .sys_clk(sys_clk),
@@ -106,8 +103,8 @@ module TOP_LAYER(
                .RGB1_Blue(RGB1_Blue),
                .RGB1_Green(RGB1_Green),
                .RGB1_Red(RGB1_Red)
-               // 已弃用RGB2_Blue,RGB2_Green,RGB2_Red
              );
+             
   // 输入钱 消抖
   genvar i;
   generate

@@ -20,17 +20,14 @@
 module LED_DISPLAY (
     input sys_clk,
     input sys_rst_n,
-    input [2:0] in_goods_high,
-    input [2:0] in_goods_low,
-    input [1:0] in_goods_num,
+    input [2:0] in_goods_high, // 商品编号高位
+    input [2:0] in_goods_low,  // 商品编号低位
+    input [1:0] in_goods_num,  // 商品数量
     input [4:0] money,
     input [5:0] state,
     output  RGB1_Blue,
     output  RGB1_Green,
     output  RGB1_Red,
-    // output RGB2_Blue,
-    // output  RGB2_Green,
-    // output  RGB2_Red,
     output [15:0] LED_btn  // 16个按键LED灯输出端口
   );
 
