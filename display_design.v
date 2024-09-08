@@ -18,21 +18,21 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-//ä¸»è¦æ€è·¯æ˜¯åŠ¨æ€å¾ªç¯æ˜¾ç¤º
+//Ö÷ÒªË¼Â·ÊÇ¶¯Ì¬Ñ­»·ÏÔÊ¾
 module display_design(  
-    // æ˜¾ç¤ºæ¨¡å—æ¥å£  
+    // ÏÔÊ¾Ä£¿é½Ó¿Ú  
     input sys_clk,   
-    input [6:0] need_money,         // æ‰€éœ€é‡‘é¢  
-    input [7:0] input_money,        // æŠ•å¸çš„æ€»å¸å€¼  
-    input [7:0] change_money,       // æ‰¾å‡ºå¤šä½™é‡‘é¢
+    input [6:0] need_money,         // ËùĞè½ğ¶î  
+    input [7:0] input_money,        // Í¶±ÒµÄ×Ü±ÒÖµ  
+    input [7:0] change_money,       // ÕÒ³ö¶àÓà½ğ¶î
     input [5:0] state,
     input [2:0] in_goods_high,
     input [2:0] in_goods_low,
     input [1:0] in_goods_num,
-    output reg [7:0] bit_select,    // æ•°ç ç®¡ä½é€‰  
-    output reg [7:0] seg_select     // æ•°ç ç®¡æ®µé€‰  
+    output reg [7:0] bit_select,    // ÊıÂë¹ÜÎ»Ñ¡  
+    output reg [7:0] seg_select     // ÊıÂë¹Ü¶ÎÑ¡  
 );  
-//å®šä¹‰16è¿›åˆ¶çš„æ˜¾ç¤ºç¼–ç 
+//¶¨Òå16½øÖÆµÄÏÔÊ¾±àÂë
 parameter SEG_0 = 8'b1100_0000, SEG_1 = 8'b1111_1001, 
             SEG_2 = 8'b1010_0100, SEG_3 = 8'b1011_0000, 
             SEG_4 = 8'b1001_1001, SEG_5 = 8'b1001_0010, 
@@ -40,10 +40,10 @@ parameter SEG_0 = 8'b1100_0000, SEG_1 = 8'b1111_1001,
             SEG_8 = 8'b1000_0000, SEG_9 = 8'b1001_0000, 
             SEG_A = 8'b1000_1000, SEG_B = 8'b1000_0011, 
             SEG_C = 8'b1100_0110, SEG_D = 8'b1010_0001, 
-            SEG_E = 8'b1000_0110, SEG_F = 8'b1000_1110,//16è¿›åˆ¶
-            SEG_S = 8'b1011_1111;//ç©ºæ ¼ 
+            SEG_E = 8'b1000_0110, SEG_F = 8'b1000_1110,//16½øÖÆ
+            SEG_S = 8'b1011_1111;//¿Õ¸ñ 
 // ------------------------------------------  
-// åˆ†é¢‘å™¨ï¼Œå°†æ—¶é’Ÿä¿¡å·é¢‘ç‡é™ä½ç”¨äºæ‰«ææ•°ç ç®¡  
+// ·ÖÆµÆ÷£¬½«Ê±ÖÓĞÅºÅÆµÂÊ½µµÍÓÃÓÚÉ¨ÃèÊıÂë¹Ü  
 // ------------------------------------------  
 reg [31:0] count_num = 32'd0;  
 always @(posedge sys_clk) begin  
@@ -55,7 +55,7 @@ always @(posedge sys_clk) begin
 end  
   
 // ------------------------------------------  
-// å¾ªç¯æ‰«æä¸åŒæ•°ç ç®¡  
+// Ñ­»·É¨Ãè²»Í¬ÊıÂë¹Ü  
 // ------------------------------------------  
 reg [2:0] sig_num = 3'd0;  
 always @(posedge sys_clk) begin  
@@ -69,51 +69,51 @@ always @(posedge sys_clk) begin
 end  
   
 // ------------------------------------------  
-// æ•°ç ç®¡ä½é€‰å’Œæ˜¾ç¤ºæ•°å­—é€»è¾‘  
+// ÊıÂë¹ÜÎ»Ñ¡ºÍÏÔÊ¾Êı×ÖÂß¼­  
 // ------------------------------------------  
 
 reg [4:0] display_num = 5'd0;  
 always @(posedge sys_clk) begin
     case (state)
         6'b001000, 6'b010000, 6'b100000,6'b000001:begin
-            // å½“å‰çŠ¶æ€ 001000, 010000, 100000 çš„æ˜¾ç¤ºé€»è¾‘
+            // µ±Ç°×´Ì¬ 001000, 010000, 100000 µÄÏÔÊ¾Âß¼­
             case (sig_num)
                 3'd0: begin bit_select <= 8'b11111110; display_num <= need_money % 10; end  
                 3'd1: begin bit_select <= 8'b11111101; display_num <= need_money / 10; end  
-                3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // æ˜¾ç¤º ç©ºæ ¼"-"
+                3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  // ÏÔÊ¾ ¿Õ¸ñ"-"
                 3'd3: begin bit_select <= 8'b11110111; display_num <= input_money % 10; end  
                 3'd4: begin bit_select <= 8'b11101111; display_num <= input_money / 10; end  
-                3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // æ˜¾ç¤º ç©ºæ ¼"-"
+                3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // ÏÔÊ¾ ¿Õ¸ñ"-"
                 3'd6: begin bit_select <= 8'b10111111; display_num <= change_money % 10; end  
                 3'd7: begin bit_select <= 8'b01111111; display_num <= change_money / 10; end  
                 default: bit_select <= 8'b11111111;  
             endcase
         end
         6'b000010, 6'b000100: begin
-            // ä¾æ¬¡æ˜¾ç¤º A, goods_one_high, goods_one_low, goods_one_num, A, goods_two_high, goods_two_low, goods_two_num
+            // ÒÀ´ÎÏÔÊ¾ A, goods_one_high, goods_one_low, goods_one_num, A, goods_two_high, goods_two_low, goods_two_num
             case (sig_num)
-                3'd0: begin bit_select <= 8'b11111110; display_num <= 5'd10; end  // A
-                3'd1: begin bit_select <= 8'b11111101; display_num <= in_goods_high; end  
-                3'd2: begin bit_select <= 8'b11111011; display_num <= in_goods_low; end  
+                3'd0: begin bit_select <= 8'b11111110; display_num <= in_goods_num; end  // A
+                3'd1: begin bit_select <= 8'b11111101; display_num <= 5'd16; end  
+                3'd2: begin bit_select <= 8'b11111011; display_num <= 5'd16; end  
                 3'd3: begin bit_select <= 8'b11110111; display_num <= 5'd16; end  
                 3'd4: begin bit_select <= 8'b11101111; display_num <= 5'd16; end  
-                3'd5: begin bit_select <= 8'b11011111; display_num <= 5'd16; end  // goods_two_high
-                3'd6: begin bit_select <= 8'b10111111; display_num <= 5'd16; end  // goods_two_low
-                3'd7: begin bit_select <= 8'b01111111; display_num <= in_goods_num; end  // goods_two_num
+                3'd5: begin bit_select <= 8'b11011111; display_num <= in_goods_low; end  
+                3'd6: begin bit_select <= 8'b10111111; display_num <= in_goods_high; end  
+                3'd7: begin bit_select <= 8'b01111111; display_num <= 5'd10; end  
                 default: bit_select <= 8'b11111111;
             endcase
         end
 
         default: begin
-            // é»˜è®¤çŠ¶æ€ä¸‹å…³é—­æ‰€æœ‰æ˜¾ç¤º
+            // Ä¬ÈÏ×´Ì¬ÏÂ¹Ø±ÕËùÓĞÏÔÊ¾
             bit_select <= 8'b11111111;
-            display_num <= 5'd16;  // ç©ºæ ¼
+            display_num <= 5'd16;  // ¿Õ¸ñ
         end
     endcase
 end
   
 // ------------------------------------------  
-// æ•°ç ç®¡æ®µé€‰è¾“å‡º  
+// ÊıÂë¹Ü¶ÎÑ¡Êä³ö  
 // ------------------------------------------  
 always @(posedge sys_clk) begin  
     case (display_num)  
