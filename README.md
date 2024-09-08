@@ -20,7 +20,7 @@ _This project is originated from two miserable juniors who are attending the sum
 - **Payment Status**: When entering the payment status, the vending machine will display the total price of the bought goods on the 7-segment displays. User can choose to insert 1-yuan coin, 5-yuan, 10-yuan, 20-yuan or 50-yuan notes by switching on the left 5 switches on FPGA. The total value paid by user is then calculated and displayed on the 7-segment displays. User can quit the payment status by pressing the `Cancel` button (`BTNC`). The vending machine will switch into a temp status to wait for the users' decision of whether to reselect the goods or just refund and quit.
 - **Change Status**: If user pays more than the total price of the bought goods, the vending machine will display the amount of change. While changing, users can press the `Change` button (`BTND`) to return the maximum face value of change in the current status.
 
-- ** Reset Status**: If user wants to start over, just press the `Quit` button (`BTNU`) anytime through the trading process to exit.
+- **Reset Status**: If user wants to start over, just press the `Quit` button (`BTNU`) anytime through the trading process to exit.
 
 ### Lights
 
