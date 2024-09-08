@@ -42,5 +42,5 @@ _This project is originated from two miserable juniors who are attending the sum
 ## Configuration in Vivado
 
 1. Set the board as NEXYS 4 DDR.
-2. Add the Verilog files and constraints files (`nexys4ddr.xdc`) to the project. Set the top-level module as `top_layer.v`.
+2. Add the Verilog files and constraints files (`Nexys4DDR_Master.xdc`) to the project. Set the top-level module as `top_layer.v`.
 3. Generate the bitstream and programme it to the FPGA. Enjoy the vending machine!
