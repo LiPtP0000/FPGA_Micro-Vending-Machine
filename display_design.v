@@ -5,11 +5,11 @@
 // 
 // Create Date: 2024/09/01 18:20:24
 // Design Name: 
-// Module Name: display_design
+// Module Name: DISPLAY_DESIGN
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
-// Description: 
+// Description: 7-segment display design for Micro-Vending-Machine
 // 
 // Dependencies: 
 // 
@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 //主要思路是动态循环显示
-module display_design(  
+module DISPLAY_DESIGN(  
     // 显示模块接口  
     input sys_clk,   
     input [6:0] need_money,         // 所需金额  

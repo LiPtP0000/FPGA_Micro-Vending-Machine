@@ -1,4 +1,23 @@
-module state_transitions (
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date: 2024/8/27 18:36
+// Design Name:
+// Module Name: STATE_TRANSITIONS
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description: FSM for Micro-Vending-Machine
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module STATE_TRANSITIONS (
     // 输入
     input wire sys_clk,
     input wire sys_rst_n,   //BTNU

@@ -1,4 +1,23 @@
-module LED_display (
+//////////////////////////////////////////////////////////////////////////////////
+// Company:
+// Engineer:
+//
+// Create Date: 2024/9/5 12:30
+// Design Name:
+// Module Name: LED_DISPLAY
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description: LED display module
+//
+// Dependencies:
+//
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+//
+//////////////////////////////////////////////////////////////////////////////////
+module LED_DISPLAY (
     input sys_clk,
     input sys_rst_n,
     input [2:0] in_goods_high,

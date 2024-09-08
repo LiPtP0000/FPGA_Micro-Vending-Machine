@@ -4,11 +4,11 @@
 //
 // Create Date: 2024/9/3 10:17
 // Design Name:
-// Module Name: top_layer
+// Module Name: TOP_LAYER
 // Project Name:
 // Target Devices:
 // Tool Versions:
-// Description:
+// Description: Top layer of Micro-Vending-Machine
 //
 // Dependencies:
 //
@@ -18,7 +18,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 
-module top_layer(
+module TOP_LAYER(
     //通过约束文件确定接口
     input wire sys_clk,    //系统时钟-CLK
     input wire [4:0] key_button,  //按键输入
@@ -59,7 +59,7 @@ module top_layer(
   
   // Instantiation
 
-  state_transitions transist(
+  STATE_TRANSITIONS transist(
                       .sys_clk(sys_clk),
                       .sys_rst_n(sys[0]),
                       .sys_Goods(sys[1]),
@@ -81,7 +81,7 @@ module top_layer(
                     );
 
 
-  display_design display(
+  DISPLAY_DESIGN display(
                    .sys_clk(sys_clk),
                    .need_money(need_money),
                    .input_money(input_money),
@@ -94,7 +94,7 @@ module top_layer(
                    .in_goods_num(in_goods_num)
                  );
 
-  LED_display LED(
+  LED_DISPLAY LED(
                .sys_clk(sys_clk),
                .sys_rst_n(sys[0]),
                .in_goods_high(in_goods_high),
@@ -106,16 +106,14 @@ module top_layer(
                .RGB1_Blue(RGB1_Blue),
                .RGB1_Green(RGB1_Green),
                .RGB1_Red(RGB1_Red)
-              //  .RGB2_Blue(RGB2_Blue),
-              //  .RGB2_Green(RGB2_Green),
-              //  .RGB2_Red(RGB2_Red)
+               // 已弃用RGB2_Blue,RGB2_Green,RGB2_Red
              );
   // 输入钱 消抖
   genvar i;
   generate
     for (i = 0; i < 5; i = i + 1)
     begin : money_key_filter
-      key_filter money_key(
+      KEY_FILTER money_key(
                    .sys_clk(sys_clk),
                    .key_in(key_in_money[i]),
                    .key_posedge(money[i])
@@ -127,47 +125,12 @@ module top_layer(
   generate
     for(i=0;i<5;i=i+1)
     begin : button_filter
-      key_filter button(
+      KEY_FILTER button(
                    .sys_clk(sys_clk),
                    .key_in(key_button[i]),
                    .key_posedge(sys[i])
                  );
     end
   endgenerate
-
-  // 选择商品编号、数目按键消抖
-
-  // generate
-  //   for(i=0;i<=2;i=i+1)
-  //   begin : goods_key_filter
-  //     key_filter goods_key(
-  //                  .sys_clk(sys_clk),
-  //                  .key_in(key_in_goods_high[i]),
-  //                  .key_posedge(in_goods_high[i])
-  //                );
-  //   end
-  // endgenerate
-
-  // generate
-  //   for(i=0;i<=2;i=i+1)
-  //   begin : goods_key_filter_low
-  //     key_filter goods_key_low(
-  //                  .sys_clk(sys_clk),
-  //                  .key_in(key_in_goods_low[i]),
-  //                  .key_posedge(in_goods_low[i])
-  //                );
-  //   end
-  // endgenerate
-
-  // generate
-  //   for(i=0;i<=1;i=i+1)
-  //   begin : goods_key_filter_num
-  //     key_filter goods_key_num(
-  //                  .sys_clk(sys_clk),
-  //                  .key_in(key_in_goods_num[i]),
-  //                  .key_posedge(in_goods_num[i])
-  //                );
-  //   end
-  // endgenerate
 
 endmodule
