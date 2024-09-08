@@ -52,6 +52,9 @@ module top_layer(
   wire [2:0] in_goods_low;       // 商品2 对应状态机中的SW2
   wire [1:0] in_goods_num;       // 商品数量
 
+  assign in_goods_high = key_in_goods_high;
+  assign in_goods_low = key_in_goods_low;
+  assign in_goods_num = key_in_goods_num;
   // Instantiation
   state_transitions transist(
                       .sys_clk(sys_clk),
@@ -130,37 +133,37 @@ module top_layer(
 
   // 选择商品编号、数目按键消抖
 
-  generate
-    for(i=0;i<=2;i=i+1)
-    begin : goods_key_filter
-      key_filter goods_key(
-                   .sys_clk(sys_clk),
-                   .key_in(key_in_goods_high[i]),
-                   .key_posedge(in_goods_high[i])
-                 );
-    end
-  endgenerate
+  // generate
+  //   for(i=0;i<=2;i=i+1)
+  //   begin : goods_key_filter
+  //     key_filter goods_key(
+  //                  .sys_clk(sys_clk),
+  //                  .key_in(key_in_goods_high[i]),
+  //                  .key_posedge(in_goods_high[i])
+  //                );
+  //   end
+  // endgenerate
 
-  generate
-    for(i=0;i<=2;i=i+1)
-    begin : goods_key_filter_low
-      key_filter goods_key_low(
-                   .sys_clk(sys_clk),
-                   .key_in(key_in_goods_low[i]),
-                   .key_posedge(in_goods_low[i])
-                 );
-    end
-  endgenerate
+  // generate
+  //   for(i=0;i<=2;i=i+1)
+  //   begin : goods_key_filter_low
+  //     key_filter goods_key_low(
+  //                  .sys_clk(sys_clk),
+  //                  .key_in(key_in_goods_low[i]),
+  //                  .key_posedge(in_goods_low[i])
+  //                );
+  //   end
+  // endgenerate
 
-  generate
-    for(i=0;i<=1;i=i+1)
-    begin : goods_key_filter_num
-      key_filter goods_key_num(
-                   .sys_clk(sys_clk),
-                   .key_in(key_in_goods_num[i]),
-                   .key_posedge(in_goods_num[i])
-                 );
-    end
-  endgenerate
+  // generate
+  //   for(i=0;i<=1;i=i+1)
+  //   begin : goods_key_filter_num
+  //     key_filter goods_key_num(
+  //                  .sys_clk(sys_clk),
+  //                  .key_in(key_in_goods_num[i]),
+  //                  .key_posedge(in_goods_num[i])
+  //                );
+  //   end
+  // endgenerate
 
 endmodule
