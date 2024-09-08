@@ -26,14 +26,7 @@ _This project is originated from two miserable juniors who are attending the sum
 
 - A RGB LED display ( `LD26`) to indicate the status of the vending machine. The LEDs will display different colors according to the status of the vending machine.
 
-<style>
-.center{
-    width:auto;
-    margin:auto;
-    display:table;
-}
-</style>
-<div class="center">
+
 | Color | Status |
 |:-------:|:--------:|
 | OFF | Idle |
@@ -42,7 +35,7 @@ _This project is originated from two miserable juniors who are attending the sum
 | Blue | Purchase Status|
 | White | Exit confirmation (Exit to Change or Item selection)|
 | Mint | Change Status|
-</div>
+
 
 - 16 LEDs ( `LD0-LD15`) to indicate the switch status(on/off, during the Good Selection Status). Note that the LEDs will be all turned ON during the Payment Status and Change Status.
 
