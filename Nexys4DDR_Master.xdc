@@ -3,12 +3,12 @@
 ## - uncomment the lines corresponding to used pins
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 ##2024/8/28
-## Clock signal
+## 时钟
 set_property -dict {PACKAGE_PIN E3 IOSTANDARD LVCMOS33} [get_ports sys_clk]
 create_clock -period 10.000 -name sys_clk_pin -waveform {0.000 5.000} -add [get_ports sys_clk]
 
 
-## Switches (用于选择商品编号和输入金额)
+## 开关 (用于选择商品编号和输入金额)
 set_property -dict {PACKAGE_PIN J15 IOSTANDARD LVCMOS33} [get_ports {key_in_goods_low[0]}]
 set_property -dict {PACKAGE_PIN L16 IOSTANDARD LVCMOS33} [get_ports {key_in_goods_low[1]}]
 set_property -dict {PACKAGE_PIN M13 IOSTANDARD LVCMOS33} [get_ports {key_in_goods_low[2]}]
@@ -25,7 +25,7 @@ set_property -dict {PACKAGE_PIN V10 IOSTANDARD LVCMOS33} [get_ports {key_in_mone
 
 
 
-## LEDs
+## 按键LED和状态RGB LED
 
 set_property -dict {PACKAGE_PIN H17 IOSTANDARD LVCMOS33} [get_ports {LED_out[0]}]
 set_property -dict {PACKAGE_PIN K15 IOSTANDARD LVCMOS33} [get_ports {LED_out[1]}]
@@ -52,7 +52,7 @@ set_property -dict {PACKAGE_PIN N15 IOSTANDARD LVCMOS33} [get_ports RGB1_Red]
 # set_property -dict {PACKAGE_PIN N16 IOSTANDARD LVCMOS33} [get_ports RGB2_Red]
 
 
-## 7-segment display (用于数码管显示)
+## 七段数码管
 set_property -dict {PACKAGE_PIN T10 IOSTANDARD LVCMOS33} [get_ports {seg_select[0]}]
 set_property -dict {PACKAGE_PIN R10 IOSTANDARD LVCMOS33} [get_ports {seg_select[1]}]
 set_property -dict {PACKAGE_PIN K16 IOSTANDARD LVCMOS33} [get_ports {seg_select[2]}]
@@ -72,7 +72,7 @@ set_property -dict {PACKAGE_PIN K2 IOSTANDARD LVCMOS33} [get_ports {bit_select[6
 set_property -dict {PACKAGE_PIN U13 IOSTANDARD LVCMOS33} [get_ports {bit_select[7]}]
 
 
-## Buttons (用于复位和各种操作按钮)
+## 五个按键（复位、选择、取消、确认、找零）
 #set_property -dict { PACKAGE_PIN C12   IOSTANDARD LVCMOS33 } [get_ports { CPU_RESETN }]; #IO_L3P_T0_DQS_AD1P_15 Sch=cpu_resetn
 set_property -dict {PACKAGE_PIN M18 IOSTANDARD LVCMOS33} [get_ports {key_button[0]}] 
 set_property -dict {PACKAGE_PIN P17 IOSTANDARD LVCMOS33} [get_ports {key_button[1]}]
