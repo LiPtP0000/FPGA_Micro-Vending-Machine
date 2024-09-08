@@ -114,7 +114,7 @@ module state_transitions (
         TEMP:
         begin
           if (sys_Cancel)
-            state <= IDLE;  // 重新选择商品
+            state <= GOODS_one;  // 重新选择商品
           else if (sys_Confirm) // 假设使用sys_Change而不是sys_cancel作为手动找零的信号名
             state <= CHANGE;
           else
@@ -239,16 +239,17 @@ module state_transitions (
         IDLE:
         begin
           input_money_buf <= 8'd0;  // 投币的总币值
-          change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+          change_money_buf <= 8'd0;  // 找出多余金额
           need_money_buf <= 7'd0;  // 所需金额
           flag <= 1'd1;  // 重置flag
+          need_money <= 7'd0;  // 所需金额
         end
         GOODS_one:
         begin
-          input_money_buf <= 8'd0;  // 投币的总币值
-          change_money_buf <= 8'd0;  // 找出多余金额，不赋值为0，防止竞争条件
+         //不需要处理input ，防止吞钱
+          change_money_buf <= 8'd0;  // 找出多余金额
           need_money_buf <= need_money_1;  // 商品 1 所需金额
-          need_money <= 7'd0;
+          need_money <= need_money_buf;
         end
         GOODS_two:
         begin
@@ -322,8 +323,15 @@ module state_transitions (
             end
           end
         end
+        TEMP:
+        begin
+          need_money_buf <= 7'd0;  
+          need_money <= 7'd0;  // 取消购买
+        end
+
       endcase
     end
   end
+
 endmodule
 

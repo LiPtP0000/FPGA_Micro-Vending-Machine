@@ -55,7 +55,10 @@ module top_layer(
   assign in_goods_high = key_in_goods_high;
   assign in_goods_low = key_in_goods_low;
   assign in_goods_num = key_in_goods_num;
+
+  
   // Instantiation
+
   state_transitions transist(
                       .sys_clk(sys_clk),
                       .sys_rst_n(sys[0]),
@@ -97,6 +100,7 @@ module top_layer(
                .in_goods_high(in_goods_high),
                .in_goods_low(in_goods_low),
                .in_goods_num(in_goods_num),
+               .money(money),
                .state(state_out),
                .LED_btn(LED_out),
                .RGB1_Blue(RGB1_Blue),
