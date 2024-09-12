@@ -50,7 +50,7 @@ _This project is originated from two miserable juniors who are attending the sum
 
 ---
 
-_这个项目源于两位正在参加东南大学暑期学校的可怜大二学生。项目致力于让每一位东大学子在东大校园内畅通无阻。_
+_这个项目源于两位正在参加东南大学暑期学校的可怜大二学生。项目致力于帮助你速通东南大学，本项目鼓励借鉴，并期望在此基础上创新，但是不建议直接抄袭。_
 
 ## 开发环境
 
