@@ -324,3 +324,5 @@ TSWLatexianTemp*
 *.wcfg
 *.runs
 *.srcs
+*.pdf
+*.vcd
