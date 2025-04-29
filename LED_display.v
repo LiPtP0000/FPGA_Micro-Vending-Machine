@@ -80,16 +80,7 @@ module LED_DISPLAY (
   end
 
   // 6个状态显示的重写，写到RGB1里面
-  always@(posedge sys_clk or posedge sys_rst_n)
-  begin
-    if(sys_rst_n)
-    begin
-      rgb_1b = 1'b0;
-      rgb_1g = 1'b0;
-      rgb_1r = 1'b0;
-    end
-    else
-    begin
+    always@(*) begin
       case(state)
         IDLE:
         begin // nothing to show
@@ -134,6 +125,5 @@ module LED_DISPLAY (
           rgb_1r = 1'b0;
         end
       endcase
-    end
   end
 endmodule
